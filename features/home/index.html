@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Home Designer - דף הבית</title>
+</head>
+<body>
+<header class="navbar">
+    <a href="#" class="logo">
+        <span class="logo-icon">🏡</span>
+        <span class="logo-text">AI Home Designer</span>
+    </a>
+    <nav class="user-nav">
+        <a href="../auth/login.html" class="btn-secondary" id="auth-btn">התחברות / הרשמה</a>
+        <a href="../client-dashboard/client-dashboard.html" class="btn-secondary">ההדמיות שלי 📁</a>
+    </nav>
+</header>
+
+<main class="main-container">
+    <section class="hero">
+        <h1>איך תרצה ליצור את <span>ההדמיה שלך?</span></h1>
+        <p>בחר את הדרך הנוחה ביותר עבורך לתאר את חלל החלומות שלך.</p>
+    </section>
+
+    <section class="options-grid">
+        
+        <!-- כרטיס 1: העלאת תמונה -->
+        <div class="option-card" data-input-type="image">
+            <div class="card-icon">🖼️</div>
+            <h2 class="card-title">העלאת תמונה</h2>
+            <p class="card-description">העלה תמונה של חדר קיים והבינה המלאכותית תעצב אותו מחדש בסגנונות שונים.</p>
+            <button class="card-btn" type="button">בחר באפשרות זו</button>
+        </div>
+
+        <!-- כרטיס 2: טקסט חופשי -->
+        <div class="option-card" data-input-type="text">
+            <div class="card-icon">📝</div>
+            <h2 class="card-title">תיאור טקסט חופשי</h2>
+            <p class="card-description">תאר במילים שלך את החדר שאתה מדמיין (צבעים, רהיטים, אווירה ותאורה).</p>
+            <button class="card-btn" type="button">בחר באפשרות זו</button>
+        </div>
+
+        <!-- כרטיס 3: טופס מובנה -->
+        <div class="option-card" data-input-type="form">
+            <div class="card-icon">📋</div>
+            <h2 class="card-title">טופס מובנה</h2>
+            <p class="card-description">בחר מתוך רשימת אפשרויות: סוג החדר, סגנון העיצוב, תקציב ופלטת צבעים.</p>
+            <button class="card-btn" type="button">בחר באפשרות זו</button>
+        </div>
+
+        <!-- כרטיס 4: הקלטה קולית -->
+        <div class="option-card" data-input-type="audio">
+            <div class="card-icon">🎙️</div>
+            <h2 class="card-title">הקלטה קולית</h2>
+            <p class="card-description">הסבר בקולך מה תרצה לעצב. המערכת תתמלל ותבין את הדרישות באופן אוטומטי.</p>
+            <button class="card-btn" type="button">בחר באפשרות זו</button>
+        </div>
+
+    </section>
+</main>
+
+<footer>
+    <p>© 2026 AI Home Designer. כל הזכויות שמורות.</p>
+</footer>
+
+<script src="home.js"></script>
+</body>
+</html>
