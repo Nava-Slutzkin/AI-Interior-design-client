@@ -126,3 +126,48 @@ function initAddCustomProduct() {
         renderProducts();
     });
 }
+
+
+/**
+ * פונקציה 5: initPrintAndSave
+ * תפקיד: מנהלת את פעולות ההדפסה של העמוד ושמירת ההדמיה לזיכרון המקומי (LocalStorage).
+ */
+function initPrintAndSave() {
+    const printBtn = document.getElementById('print-btn');
+    const saveBtn = document.getElementById('save-btn');
+
+    // פעולת הדפסה
+    if (printBtn) {
+        printBtn.addEventListener('click', () => {
+            window.print();
+        });
+    }
+
+    // פעולת שמירה לדף הלקוח (Dashboard)
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            // שליפת רשימת ההדמיות השמורות הקיימות או יצירת מערך חדש
+            const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns')) || [];
+            
+            const newDesignRecord = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('he-IL'),
+                imageSrc: document.getElementById('result-image')?.src || '',
+                totalPrice: designProducts.reduce((sum, p) => sum + p.price, 0),
+                productsCount: designProducts.length
+            };
+
+            savedDesigns.push(newDesignRecord);
+            localStorage.setItem('savedDesigns', JSON.stringify(savedDesigns));
+
+            alert('ההדמיה נשמרה בהצלחה באזור האישי שלך!');
+        });
+    }
+}
+
+// הפעלת כל המערכת מיד טעינת ה-DOM במלואו
+document.addEventListener('DOMContentLoaded', () => {
+    renderProducts();
+    initAddCustomProduct();
+    initPrintAndSave();
+});
