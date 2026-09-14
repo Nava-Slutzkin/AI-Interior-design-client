@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+<header class="navbar">
+    <a href="../home/index.html" class="logo">
+        <span class="logo-icon">🏡</span>
+        <span class="logo-text">AI Home Designer</span>
+    </a>
+    <nav class="user-nav">
+        <a href="../client-dashboard/client-dashboard.html" class="btn-secondary">ההדמיות שלי 📁</a>
+    </nav>
+</header>
+
+<main class="main-container">
+    
+    <section class="result-header">
+        <h1>תוצאת העיצוב שלך</h1>
+        <p>הנה ההדמיה המרהיבה שהופקה עבור החלל שלך, בצירוף רשימת מוצרים והערכת מחירים ממוצעת.</p>
+    </section>
+
+    <section class="result-display-section">
+        <div class="image-container">
+            <img id="result-image" src="../../assets/images/placeholder-room.jpg" alt="הדמיית עיצוב חדר">
+            <div class="image-actions">
+                <button type="button" id="print-btn" class="btn-secondary">הדפס הדמיה 🖨️</button>
+                <button type="button" id="save-btn" class="btn-primary">שמור הדמיה 💾</button>
+            </div>
+        </div>
+
+        <div class="products-panel">
+            <div class="panel-header">
+                <h2>רשימת רהיטים ואקססוריז</h2>
+                <span id="total-price-tag">עלות משוערת כוללת: ₪<span id="total-price">0</span></span>
+            </div>
+
+            <div id="products-list" class="products-list">
+                <!-- מוצרים יוזרקו דינמית על ידי result.js -->
+            </div>
+
+            <div class="add-product-container">
+                <button type="button" id="add-custom-product-btn" class="btn-secondary">+ הוסף מוצר לרשימה</button>
+            </div>
+        </div>
+    </section>
+
+    <div class="dashboard-navigation">
+        <a href="../client-dashboard/client-dashboard.html" class="btn-primary-large">מעבר לאוסף ההדמיות השמורות 📁</a>
+    </div>
+
+</main>
+
+<footer>
+    <p>© 2026 AI Home Designer. כל הזכויות שמורות.</p>
+</footer>
+
+<!-- צ'אט בוט צף -->
+<div id="chat-widget-container"></div>
+
+
+<script type="module" src="result.js"></script>
+
+</body>
+</html>
