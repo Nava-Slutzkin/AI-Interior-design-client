@@ -34,3 +34,18 @@ function setupOptionListeners() {
         });
     });
 }
+
+
+/**
+ * פונקציה 3: מנווטת לדף הביניים (Wizard) עם הפרמטר ב-URL
+ * @param {string} inputType - 'image' | 'text' | 'form' | 'audio'
+ */
+function navigateToWizard(inputType) {
+    if (!inputType) {
+        console.error('לא נבחר סוג קלט תקין');
+        return;
+    }
+
+    // מעבר לדף הביניים תוך העברת סוג הקלט כ-Query Parameter
+    window.location.href = `../form-wizard/wizard.html?type=${encodeURIComponent(inputType)}`;
+}
