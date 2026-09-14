@@ -67,3 +67,24 @@ function updateTotalPrice() {
     totalPriceSpan.textContent = total.toLocaleString();
 }
 
+
+/**
+ * פונקציה 3: initRemoveButtons
+ * תפקיד: מאזינה ללחיצות על כפתורי המחיקה (פח) של המוצרים ומוחקת אותם מהמערך.
+ */
+function initRemoveButtons() {
+    const removeButtons = document.querySelectorAll('.remove-product-btn');
+
+    removeButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            // שליפת ה-ID של המוצר מתוך מאפיין ה-data-id
+            const productId = parseInt(e.target.getAttribute('data-id'), 10);
+                        
+            // סינון המערך כך שיישאר כל מוצר שאינו ה-ID שנמחק
+            designProducts = designProducts.filter(product => product.id !== productId);
+            
+            // רינדור מחדש של הרשימה והמחיר
+            renderProducts();
+        });
+    });
+}
