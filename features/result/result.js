@@ -88,3 +88,41 @@ function initRemoveButtons() {
         });
     });
 }
+
+
+
+/**
+ * פונקציה 4: initAddCustomProduct
+ * תפקיד: מאפשרת למשתמש להוסיף מוצר חדש בהתאמה אישית לרשימה.
+ */
+function initAddCustomProduct() {
+    const addBtn = document.getElementById('add-custom-product-btn');
+    if (!addBtn) return;
+
+    addBtn.addEventListener('click', () => {
+        // קבלת שם המוצר והמחיר מהמשתמש באמצעות תיבות קלט פשוטות
+        const productName = prompt('הכנס את שם המוצר או האקססורי החדש:');
+        if (!productName || productName.trim() === '') return;
+
+        const productPriceInput = prompt('הכנס את המחיר המשוער (במספרים):');
+        const productPrice = parseFloat(productPriceInput);
+
+        if (isNaN(productPrice) || productPrice < 0) {
+            alert('אנא הכנס מחיר תקין.'); // הערה: מותר להשתמש ב-alert/prompt במסגרת לוגיקת לקוח פנימית בעת קלט
+            return;
+        }
+
+        // יצירת אובייקט מוצר חדש והוספתו למערך
+        const newProduct = {
+            id: Date.now(), // יצירת מזהה ייחודי מבוסס זמן
+            name: productName.trim(),
+            price: productPrice,
+            link: 'https://example.com'
+        };
+
+        designProducts.push(newProduct);
+
+        // עדכון התצוגה בדף
+        renderProducts();
+    });
+}
