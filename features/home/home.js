@@ -15,3 +15,22 @@ function checkAuthState() {
         authBtn.href = '../client-dashboard/client-dashboard.html';
     }
 }
+
+
+/**
+ * פונקציה 2: מחברת מאזיני אירועים (Event Listeners) לכל הכרטיסים בעלי data-input-type
+ */
+function setupOptionListeners() {
+    // שליפת כל ה-Cards שקיימת לגביהם התכונה data-input-type
+    const optionCards = document.querySelectorAll('[data-input-type]');
+
+    optionCards.forEach(card => {
+        card.addEventListener('click', () => {
+            // חילוץ סוג הקלט מתוך התכונה data-input-type של הכרטיס
+            const inputType = card.getAttribute('data-input-type');
+            
+            // קריאה לפונקציית הניווט
+            navigateToWizard(inputType);
+        });
+    });
+}
