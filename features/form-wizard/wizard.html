@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <header class="navbar">
+    <a href="../home/index.html" class="logo">
+        <span class="logo-icon">🏡</span>
+        <span class="logo-text">AI Home Designer</span>
+    </a>
+    <nav class="user-nav">
+        <a href="../home/index.html" class="btn-secondary">חזרה לדף הבית 🏠</a>
+        <a href="../client-dashboard/client-dashboard.html" class="btn-secondary">ההדמיות שלי 📁</a>
+    </nav>
+</header>
+
+<main class="main-container">
+    <section class="wizard-header">
+        <h1 id="wizard-title">הגדרת פרטי ההדמיה</h1>
+        <p id="wizard-subtitle">מלא את הפרטים כדי שהבינה המלאכותית תוכל ליצור עבורך את העיצוב המדויק.</p>
+    </section>
+
+    <section class="wizard-content">
+        <form id="wizard-form" class="wizard-form">
+            
+            <!-- אזור דינמי שבו יוזרקו השדות לפי סוג הקלט שנבחר (תמונה / טקסט / טופס / אודיו) -->
+            <div id="dynamic-fields-container" class="fields-container">
+                <!-- הוזן דינמית על ידי wizard.js -->
+            </div>
+
+            <!-- כפתור הגשה -->
+            <div class="form-actions">
+                <button type="submit" id="submit-btn" class="btn-primary">
+                    <span class="btn-text">צור הדמיה ✨</span>
+                </button>
+            </div>
+
+        </form>
+
+        <!-- אזור טעינה בזמן יצירת ההדמיה -->
+        <div id="loading-state" class="loading-container hidden">
+            <div class="spinner"></div>
+            <h2>הבינה המלאכותית מעצבת את החלל שלך...</h2>
+            <p>זה עשוי לקחת מספר שניות, נא לא לסגור את הדף.</p>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>© 2026 AI Home Designer. כל הזכויות שמורות.</p>
+</footer>
+
+<script type="module" src="wizard.js"></script>
+
+    
+</body>
+</html>
