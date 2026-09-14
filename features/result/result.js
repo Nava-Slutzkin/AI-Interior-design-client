@@ -50,3 +50,20 @@ function renderProducts() {
     // הפעלת האזנה לכפתורי ההסרה של המוצרים שהרגע הזרקנו
     initRemoveButtons();
 }
+
+
+/**
+ * פונקציה 2: updateTotalPrice
+ * תפקיד: מחשבת את סכום המחירים של כל המוצרים הנויימים ברשימה ומעדכנת את התגית בדף.
+ */
+function updateTotalPrice() {
+    const totalPriceSpan = document.getElementById('total-price');
+    if (!totalPriceSpan) return;
+
+    // חישוב סכום כל המחירים במערך באמצעות פונקציית reduce
+    const total = designProducts.reduce((sum, product) => sum + product.price, 0);
+    
+    // הצגת הסכום המעודכן במסך
+    totalPriceSpan.textContent = total.toLocaleString();
+}
+
