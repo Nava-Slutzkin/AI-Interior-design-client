@@ -47,6 +47,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `
         },
+        form: {
+            title: 'טופס מובנה לעיצוב החלל',
+            subtitle: 'בחר את מאפייני החלל והסגנון הרצויים לך.',
+            fields: `
+                <div class="form-group">
+                    <label for="structured-room-type">סוג החדר:</label>
+                    <select id="structured-room-type" name="roomType" required>
+                        <option value="living-room">סלון</option>
+                        <option value="kitchen">מטבח</option>
+                        <option value="bedroom">חדר שינה</option>
+                        <option value="office">משרד ביתי</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="design-style">סגנון עיצוב:</label>
+                    <select id="design-style" name="designStyle" required>
+                        <option value="modern">מודרני</option>
+                        <option value="minimal">מינימליסטי</option>
+                        <option value="rustic">כפרי</option>
+                        <option value="classic">קלאסי</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="budget">תקציב משוער:</label>
+                    <input id="budget" name="budget" type="number" min="0" step="1" required>
+                </div>
+            `
+        },
         audio: {
             title: 'הגדרת עיצוב באמצעות הקלטה קולית',
             subtitle: 'ספר לנו בקולך על הדרישות העיצוביות.',
@@ -102,10 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadingState.classList.remove('hidden');
             }
 
-            // הדמיית תהליך עיבוד נתונים ומעבר עתידי ללוח הבקרה
+            const formData = new FormData(wizardForm);
+            const submission = Object.fromEntries(formData.entries());
+            sessionStorage.setItem('designRequest', JSON.stringify({ type: inputType, ...submission }));
+
             setTimeout(() => {
-                window.location.href = '../client-dashboard/client-dashboard.html';
-            }, 3000);
+                window.location.href = '../result/result.html';
+            }, 800);
         });
     }
 

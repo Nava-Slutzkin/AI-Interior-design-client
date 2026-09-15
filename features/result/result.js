@@ -30,16 +30,32 @@ function renderProducts() {
     designProducts.forEach(product => {
         const productItem = document.createElement('div');
         productItem.className = 'product-item';
-           productItem.innerHTML = `
-            <div class="product-info">
-                <span class="product-name">${product.name}</span>
-                <span class="product-price">₪${product.price}</span>
-            </div>
-            <div class="product-actions">
-                <a href="${product.link}" target="_blank" class="product-link">קישור לרכישה 🔗</a>
-                <button type="button" class="remove-product-btn" data-id="${product.id}" title="הסר מוצר">🗑️</button>
-            </div>
-        `;
+        const productInfo = document.createElement('div');
+        productInfo.className = 'product-info';
+        const productName = document.createElement('span');
+        productName.className = 'product-name';
+        productName.textContent = product.name;
+        const productPrice = document.createElement('span');
+        productPrice.className = 'product-price';
+        productPrice.textContent = `₪${product.price.toLocaleString()}`;
+        productInfo.append(productName, productPrice);
+
+        const productActions = document.createElement('div');
+        productActions.className = 'product-actions';
+        const productLink = document.createElement('a');
+        productLink.href = product.link;
+        productLink.target = '_blank';
+        productLink.rel = 'noopener noreferrer';
+        productLink.className = 'product-link';
+        productLink.textContent = 'קישור לרכישה 🔗';
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'remove-product-btn';
+        removeButton.dataset.id = product.id;
+        removeButton.title = 'הסר מוצר';
+        removeButton.textContent = '🗑️';
+        productActions.append(productLink, removeButton);
+        productItem.append(productInfo, productActions);
 
         productsListContainer.appendChild(productItem);
     });
@@ -78,7 +94,7 @@ function initRemoveButtons() {
     removeButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             // שליפת ה-ID של המוצר מתוך מאפיין ה-data-id
-            const productId = parseInt(e.target.getAttribute('data-id'), 10);
+            const productId = parseInt(e.currentTarget.getAttribute('data-id'), 10);
                         
             // סינון המערך כך שיישאר כל מוצר שאינו ה-ID שנמחק
             designProducts = designProducts.filter(product => product.id !== productId);
@@ -147,7 +163,13 @@ function initPrintAndSave() {
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
             // שליפת רשימת ההדמיות השמורות הקיימות או יצירת מערך חדש
-            const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns')) || [];
+            let savedDesigns = [];
+            try {
+                const storedDesigns = JSON.parse(localStorage.getItem('savedDesigns'));
+                savedDesigns = Array.isArray(storedDesigns) ? storedDesigns : [];
+            } catch {
+                savedDesigns = [];
+            }
             
             const newDesignRecord = {
                 id: Date.now(),

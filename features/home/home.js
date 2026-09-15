@@ -1,3 +1,4 @@
+
 /**
  * פונקציה 1: בודקת אם קיים Token ב-localStorage
  * ומעדכנת דינמית את הכפתור בסרגל העליון
@@ -49,3 +50,8 @@ function navigateToWizard(inputType) {
     // מעבר לדף הביניים תוך העברת סוג הקלט כ-Query Parameter
     window.location.href = `../form-wizard/wizard.html?type=${encodeURIComponent(inputType)}`;
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuthState();
+    setupOptionListeners();
+});
