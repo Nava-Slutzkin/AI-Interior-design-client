@@ -1,0 +1,158 @@
+const API_BASE_URL = 'http://localhost:1000/api';
+
+const tabButtons = document.querySelectorAll('.tab');
+const forms = {
+    login: document.getElementById('login-form'),
+    register: document.getElementById('register-form')
+};
+const messageBox = document.getElementById('auth-message');
+
+function showMessage(text, type = 'success') {
+    messageBox.textContent = text;
+    messageBox.className = `message ${type}`;
+}
+
+function clearMessage() {
+    messageBox.textContent = '';
+    messageBox.className = 'message';
+}
+
+function setActiveTab(tabName) {
+    tabButtons.forEach((button) => {
+        const isActive = button.dataset.tab === tabName;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-selected', String(isActive));
+    });
+
+    Object.entries(forms).forEach(([key, form]) => {
+        form.classList.toggle('active', key === tabName);
+    });
+}
+
+function validateLoginForm(data) {
+    if (!data.name || !data.password) {
+        throw new Error('נא למלא שם וסיסמא');
+    }
+}
+
+function validateRegisterForm(data) {
+    if (!data.name || !data.phone || !data.email || !data.password || !data.confirmPassword) {
+        throw new Error('נא למלא את כל השדות');
+    }
+
+    if (data.password !== data.confirmPassword) {
+        throw new Error('הסיסמאות אינן תואמות');
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(data.email)) {
+        throw new Error('כתובת המייל לא תקינה');
+    }
+}
+
+async function sendRequest(endpoint, payload) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    let result = null;
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+        result = await response.json();
+    } else {
+        const text = await response.text();
+        result = text ? { message: text } : {};
+    }
+
+    if (!response.ok) {
+        throw new Error(result?.message || 'הבקשה נכשלה');
+    }
+
+    return result;
+}
+
+function saveAuthData(data) {
+    const token = data.token || data.accessToken || data.jwt || data.data?.token;
+    const user = data.user || data.data?.user || data.account || { name: data.name || data.username };
+
+    if (token) {
+        localStorage.setItem('token', token);
+    }
+
+    if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+    }
+}
+
+async function handleLoginSubmit(event) {
+    event.preventDefault();
+    clearMessage();
+
+    const formData = new FormData(forms.login);
+    const payload = {
+        name: String(formData.get('name') || '').trim(),
+        username: String(formData.get('name') || '').trim(),
+        password: String(formData.get('password') || '').trim()
+    };
+
+    try {
+        validateLoginForm(payload);
+        showMessage('מתחבר...', 'success');
+
+        const response = await sendRequest('/auth/login', payload);
+        saveAuthData(response);
+
+        showMessage('התחברת בהצלחה! מעביר אותך לעמוד הבית...', 'success');
+        setTimeout(() => {
+            window.location.href = '../home/index.html';
+        }, 900);
+    } catch (error) {
+        showMessage(error.message || 'אירעה שגיאה בהתחברות', 'error');
+    }
+}
+
+async function handleRegisterSubmit(event) {
+    event.preventDefault();
+    clearMessage();
+
+    const formData = new FormData(forms.register);
+    const payload = {
+        name: String(formData.get('name') || '').trim(),
+        phone: String(formData.get('phone') || '').trim(),
+        email: String(formData.get('email') || '').trim(),
+        password: String(formData.get('password') || '').trim(),
+        confirmPassword: String(formData.get('confirmPassword') || '').trim()
+    };
+
+    try {
+        validateRegisterForm(payload);
+        showMessage('יוצר חשבון...', 'success');
+
+        const response = await sendRequest('/auth/register', payload);
+        saveAuthData(response);
+
+        showMessage('החשבון נוצר בהצלחה! מעביר אותך לעמוד הבית...', 'success');
+        setTimeout(() => {
+            window.location.href = '../home/index.html';
+        }, 900);
+    } catch (error) {
+        showMessage(error.message || 'אירעה שגיאה בהרשמה', 'error');
+    }
+}
+
+tabButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        clearMessage();
+        setActiveTab(button.dataset.tab);
+    });
+});
+
+forms.login.addEventListener('submit', handleLoginSubmit);
+forms.register.addEventListener('submit', handleRegisterSubmit);
+
+setActiveTab('login');

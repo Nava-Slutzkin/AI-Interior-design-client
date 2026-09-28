@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>אזור אישי - הדמיות</title>
+  <link rel="stylesheet" href="client-dashboard.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">🏡</span>
+      <span>AI Home Designer</span>
+    </div>
+    <nav class="nav-links">
+      <a href="../home/index.html">דף הבית</a>
+      <button id="logout-btn" class="ghost-btn" type="button">התנתקות</button>
+    </nav>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="summary-cards">
+      <div class="card">
+        <span class="label">ההדמיות שלי</span>
+        <strong id="design-count">0</strong>
+      </div>
+      <div class="card">
+        <span class="label">תקציב ממוצע</span>
+        <strong id="avg-budget">0 ₪</strong>
+      </div>
+      <div class="card">
+        <span class="label">סגנון מועדף</span>
+        <strong id="favorite-style">-</strong>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">ניהול</p>
+          <h1>הדמיות</h1>
+        </div>
+        <button id="new-design-btn" class="primary-btn" type="button">＋ הוספת הדמיה</button>
+      </div>
+
+      <form id="design-form" class="design-form">
+        <input type="hidden" id="design-id">
+
+        <label>
+          <span>שם ההדמיה</span>
+          <input id="design-name" name="name" type="text" placeholder="לדוגמה: חדר שינה מודרני" required>
+        </label>
+
+        <label>
+          <span>סוג החדר</span>
+          <select id="design-room" name="roomType" required>
+            <option value="">בחר סוג חדר</option>
+            <option value="סלון">סלון</option>
+            <option value="חדר שינה">חדר שינה</option>
+            <option value="מטבח">מטבח</option>
+            <option value="חדר ילדים">חדר ילדים</option>
+            <option value="משרד ביתי">משרד ביתי</option>
+          </select>
+        </label>
+
+        <label>
+          <span>סגנון</span>
+          <select id="design-style" name="style" required>
+            <option value="">בחר סגנון</option>
+            <option value="מודרני">מודרני</option>
+            <option value="כפרי">כפרי</option>
+            <option value="לופט">לופט</option>
+            <option value="קלאסי">קלאסי</option>
+            <option value="מינימליסטי">מינימליסטי</option>
+          </select>
+        </label>
+
+        <label>
+          <span>תקציב</span>
+          <input id="design-budget" name="budget" type="number" min="0" step="100" placeholder="15000" required>
+        </label>
+
+        <label class="full-width">
+          <span>הערות</span>
+          <textarea id="design-notes" name="notes" rows="4" placeholder="תאר את המראה הרצוי..."></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">שמור</button>
+          <button id="cancel-edit-btn" type="button" class="secondary-btn">ביטול</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel list-panel">
+      <div class="panel-header compact">
+        <div>
+          <p class="eyebrow">רשימה</p>
+          <h2>ההדמיות שלי</h2>
+        </div>
+      </div>
+      <div id="design-list" class="design-list"></div>
+    </section>
+  </main>
+
+  <script src="client-dashboard.js"></script>
+</body>
+</html>

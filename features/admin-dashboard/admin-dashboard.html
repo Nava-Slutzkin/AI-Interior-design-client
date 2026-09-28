@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>לוח מנהל</title>
+  <link rel="stylesheet" href="admin-dashboard.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">🛠️</span>
+      <span>Admin Dashboard</span>
+    </div>
+    <nav class="nav-links">
+      <a href="../home/index.html">דף הבית</a>
+      <button id="logout-btn" class="ghost-btn" type="button">התנתקות</button>
+    </nav>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="stats-grid">
+      <div class="stat-box">
+        <span class="stat-label">סה"כ לקוחות רשומים</span>
+        <strong id="total-users">0</strong>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">סה"כ הדמיות</span>
+        <strong id="total-designs">0</strong>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">הסגנון המבוקש ביותר</span>
+        <strong id="top-style">-</strong>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">תקציב ממוצע לחדר</span>
+        <strong id="avg-budget">0 ₪</strong>
+      </div>
+    </section>
+
+    <section class="charts-panel panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">סטטיסטיקות</p>
+          <h2>גרפים</h2>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>לקוחות רשומים לפי חודשים</h3>
+          <div id="users-chart" class="bars"></div>
+        </div>
+
+        <div class="chart-card">
+          <h3>הדמיות לפי חודשים</h3>
+          <div id="designs-chart" class="bars"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header compact">
+        <div>
+          <p class="eyebrow">ניהול</p>
+          <h2>משתמשים</h2>
+        </div>
+      </div>
+      <div id="users-table" class="table-wrap"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header compact">
+        <div>
+          <p class="eyebrow">ניהול</p>
+          <h2>הדמיות</h2>
+        </div>
+      </div>
+      <div id="designs-table" class="table-wrap"></div>
+    </section>
+  </main>
+
+  <script src="admin-dashboard.js"></script>
+</body>
+</html>

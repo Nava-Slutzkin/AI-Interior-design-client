@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>התחברות / הרשמה</title>
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div class="auth-card">
+            <div class="topbar">
+                <a href="../home/index.html" class="back-link">← חזרה לדף הבית</a>
+            </div>
+
+            <div class="brand" aria-label="AI Home Designer">
+                <span class="brand-icon">🏡</span>
+                <span>AI Home Designer</span>
+            </div>
+
+            <div class="tab-switch" role="tablist" aria-label="בחירת מצב התחברות">
+                <button class="tab active" type="button" data-tab="login" aria-selected="true">התחברות</button>
+                <button class="tab" type="button" data-tab="register" aria-selected="false">הרשמה</button>
+            </div>
+
+            <form id="login-form" class="auth-form active" novalidate>
+                <h2>התחברות</h2>
+
+                <label>
+                    <span>שם</span>
+                    <input id="login-name" name="name" type="text" placeholder="הקלד את שמך" autocomplete="username" required>
+                </label>
+
+                <label>
+                    <span>סיסמא</span>
+                    <input id="login-password" name="password" type="password" placeholder="הקלד סיסמא" autocomplete="current-password" required>
+                </label>
+
+                <button type="submit" class="primary-btn">התחבר</button>
+            </form>
+
+            <form id="register-form" class="auth-form" novalidate>
+                <h2>הרשמה</h2>
+
+                <label>
+                    <span>שם</span>
+                    <input id="register-name" name="name" type="text" placeholder="שם מלא" autocomplete="name" required>
+                </label>
+
+                <label>
+                    <span>מספר טלפון</span>
+                    <input id="register-phone" name="phone" type="tel" placeholder="050-1234567" autocomplete="tel" required>
+                </label>
+
+                <label>
+                    <span>מייל</span>
+                    <input id="register-email" name="email" type="email" placeholder="name@example.com" autocomplete="email" required>
+                </label>
+
+                <label>
+                    <span>סיסמא</span>
+                    <input id="register-password" name="password" type="password" placeholder="הקלד סיסמא" autocomplete="new-password" required>
+                </label>
+
+                <label>
+                    <span>אימות סיסמא</span>
+                    <input id="register-confirm-password" name="confirmPassword" type="password" placeholder="הקלד שוב את הסיסמא" autocomplete="new-password" required>
+                </label>
+
+                <button type="submit" class="primary-btn">צור חשבון</button>
+            </form>
+
+            <div id="auth-message" class="message" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+</body>
+</html>
