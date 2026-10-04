@@ -3,6 +3,32 @@
  * הקובץ בנוי שלב אחר שלב עם הסברים והערות בעברית.
  */
 
+function getCurrentUser() {
+    try {
+        return JSON.parse(localStorage.getItem('user') || 'null');
+    } catch {
+        return null;
+    }
+}
+
+function requireAuth() {
+    const token = localStorage.getItem('token');
+    const user = getCurrentUser();
+
+    if (!token || !user) {
+        window.location.href = '../auth/login.html';
+        return false;
+    }
+
+    return true;
+}
+
+function getSavedDesignsKey() {
+    const user = getCurrentUser();
+    const userKey = user?.email || user?._id || user?.id || 'guest';
+    return `savedDesigns:${userKey}`;
+}
+
 // מערך התחלתי המדמה את רשימת הרהיטים והאקססוריז שהבינה המלאכותית התאימה לעיצוב
 let designProducts = [
     { id: 1, name: 'ספה מעוצבת תלת מושבית', price: 3400, link: 'https://example.com/sofa' },
@@ -162,10 +188,11 @@ function initPrintAndSave() {
     // פעולת שמירה לדף הלקוח (Dashboard)
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
-            // שליפת רשימת ההדמיות השמורות הקיימות או יצירת מערך חדש
+            const savedDesignsKey = getSavedDesignsKey();
+
             let savedDesigns = [];
             try {
-                const storedDesigns = JSON.parse(localStorage.getItem('savedDesigns'));
+                const storedDesigns = JSON.parse(localStorage.getItem(savedDesignsKey));
                 savedDesigns = Array.isArray(storedDesigns) ? storedDesigns : [];
             } catch {
                 savedDesigns = [];
@@ -180,7 +207,7 @@ function initPrintAndSave() {
             };
 
             savedDesigns.push(newDesignRecord);
-            localStorage.setItem('savedDesigns', JSON.stringify(savedDesigns));
+            localStorage.setItem(savedDesignsKey, JSON.stringify(savedDesigns));
 
             alert('ההדמיה נשמרה בהצלחה באזור האישי שלך!');
         });
@@ -189,6 +216,10 @@ function initPrintAndSave() {
 
 // הפעלת כל המערכת מיד טעינת ה-DOM במלואו
 document.addEventListener('DOMContentLoaded', () => {
+    if (!requireAuth()) {
+        return;
+    }
+
     renderProducts();
     initAddCustomProduct();
     initPrintAndSave();

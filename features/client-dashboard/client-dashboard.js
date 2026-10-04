@@ -2,13 +2,39 @@ const CURRENT_USER_KEY = 'ai-home-current-user';
 const USERS_KEY = 'ai-home-users';
 const DESIGNS_KEY = 'ai-home-designs';
 
-const currentUser = JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || JSON.stringify({
-  id: 'u-1',
-  name: 'מיכאל כהן',
-  email: 'michael@example.com',
-  phone: '0501234567',
-  role: 'client'
-}));
+function getCurrentUser() {
+  try {
+    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+    if (storedUser) {
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(storedUser));
+      return storedUser;
+    }
+  } catch (error) {
+    console.warn('Could not parse current user', error);
+  }
+
+  return JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || JSON.stringify({
+    id: 'guest',
+    name: 'אורח',
+    email: 'guest@example.com',
+    phone: '',
+    role: 'client'
+  }));
+}
+
+const currentUser = getCurrentUser();
+
+function requireAuth() {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+
+  if (!token || !user) {
+    window.location.href = '../auth/login.html';
+    return false;
+  }
+
+  return true;
+}
 
 function seedUsers() {
   if (!localStorage.getItem(USERS_KEY)) {
@@ -195,10 +221,15 @@ function submitDesign(event) {
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  localStorage.removeItem(CURRENT_USER_KEY);
   window.location.href = '../auth/login.html';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (!requireAuth()) {
+    return;
+  }
+
   seedUsers();
   seedDesigns();
   renderSummary();

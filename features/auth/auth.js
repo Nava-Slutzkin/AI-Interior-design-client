@@ -30,8 +30,17 @@ function setActiveTab(tabName) {
 }
 
 function validateLoginForm(data) {
-    if (!data.name || !data.password) {
-        throw new Error('נא למלא שם וסיסמא');
+    if (!data.email || !data.password) {
+        throw new Error('נא למלא מייל וסיסמא');
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(data.email)) {
+        throw new Error('כתובת המייל לא תקינה');
+    }
+
+    if (data.password.length < 8) {
+        throw new Error('הסיסמא חייבת להכיל לפחות 8 תווים');
     }
 }
 
@@ -42,6 +51,14 @@ function validateRegisterForm(data) {
 
     if (data.password !== data.confirmPassword) {
         throw new Error('הסיסמאות אינן תואמות');
+    }
+
+    if (data.password.length < 8) {
+        throw new Error('הסיסמא חייבת להכיל לפחות 8 תווים');
+    }
+
+    if (!/^\+?[\d\s().-]{7,20}$/.test(data.phone)) {
+        throw new Error('מספר הטלפון לא תקין');
     }
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -86,6 +103,7 @@ function saveAuthData(data) {
 
     if (user) {
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('ai-home-current-user', JSON.stringify(user));
     }
 }
 
@@ -94,9 +112,11 @@ async function handleLoginSubmit(event) {
     clearMessage();
 
     const formData = new FormData(forms.login);
+    const email = String(formData.get('email') || formData.get('name') || '').trim();
     const payload = {
-        name: String(formData.get('name') || '').trim(),
-        username: String(formData.get('name') || '').trim(),
+        email,
+        name: email,
+        username: email,
         password: String(formData.get('password') || '').trim()
     };
 
@@ -154,5 +174,9 @@ tabButtons.forEach((button) => {
 
 forms.login.addEventListener('submit', handleLoginSubmit);
 forms.register.addEventListener('submit', handleRegisterSubmit);
+
+if (localStorage.getItem('token') && localStorage.getItem('user')) {
+    window.location.href = '../home/index.html';
+}
 
 setActiveTab('login');
