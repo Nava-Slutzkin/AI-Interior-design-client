@@ -1,6 +1,5 @@
 /**
- * קובץ result.js - ניהול הלוגיקת של דף תוצאת העיצוב
- * הקובץ בנוי שלב אחר שלב עם הסברים והערות בעברית.
+ * קובץ result.js - ניהול הלוגיקה של דף תוצאת העיצוב
  */
 
 function getCurrentUser() {
@@ -23,13 +22,10 @@ function requireAuth() {
     return true;
 }
 
-function getSavedDesignsKey() {
-    const user = getCurrentUser();
-    const userKey = user?.email || user?._id || user?.id || 'guest';
-    return `savedDesigns:${userKey}`;
-}
+// מפתח אחיד לשמירת עיצובים בדומה לאזור האישי
+const DESIGNS_KEY = 'ai-home-designs';
 
-// מערך התחלתי המדמה את רשימת הרהיטים והאקססוריז שהבינה המלאכותית התאימה לעיצוב
+// מערך התחלתי המדמה את רשימת הרהיטים והאקססוריז
 let designProducts = [
     { id: 1, name: 'ספה מעוצבת תלת מושבית', price: 3400, link: 'https://example.com/sofa' },
     { id: 2, name: 'שולחן סלון בשילוב עץ ומתכת', price: 1200, link: 'https://example.com/table' },
@@ -37,112 +33,115 @@ let designProducts = [
     { id: 4, name: 'מנורת עמידה מעוצבת', price: 450, link: 'https://example.com/lamp' }
 ];
 
+/**
+ * פונקציה: loadWizardRequestData
+ * תפקיד: קוראת את נתוני הבקשה שנשמרו מהטופס (wizard.html) ומעדכנת את התצוגה בדף
+ */
+function loadWizardRequestData() {
+    try {
+        const storedRequest = sessionStorage.getItem('designRequest');
+        if (!storedRequest) return;
+
+        const requestData = JSON.parse(storedRequest);
+        
+        // עדכון כותרת או פרטים בדף אם הקיימים אלמנטים מתאימים
+        const titleElement = document.getElementById('result-title');
+        if (titleElement && requestData.roomType) {
+            titleElement.textContent = `עיצוב עבור ${requestData.roomType} בסגנון ${requestData.style || 'מודרני'}`;
+        }
+    } catch (e) {
+        console.error('שגיאה שטעינת נתוני הבקשה:', e);
+    }
+}
 
 /**
  * פונקציה 1: renderProducts
- * תפקיד: עוברת על מערך המוצרים, מייצרת עבורם אלמנטים ב-HTML ומזריקה אותם לדף,
- * ובנוסף קוראת לפונקציה שמחשבת את סך כל המחירים.
  */
 function renderProducts() {
     const productsListContainer = document.getElementById('products-list');
     
-    // אם האלמנט לא נמצא בדף, נעצור את ריצת הפונקציה למניעת שגיאות
     if (!productsListContainer) return;
 
-    // איפוס תכולת הרשימה לפני הזרקה מחדש
     productsListContainer.innerHTML = '';
 
-        // מעבר על כל מוצר במערך ויצירת מבנה ה-HTML שלו
     designProducts.forEach(product => {
         const productItem = document.createElement('div');
         productItem.className = 'product-item';
+
         const productInfo = document.createElement('div');
         productInfo.className = 'product-info';
+
         const productName = document.createElement('span');
         productName.className = 'product-name';
         productName.textContent = product.name;
+
         const productPrice = document.createElement('span');
         productPrice.className = 'product-price';
         productPrice.textContent = `₪${product.price.toLocaleString()}`;
+
         productInfo.append(productName, productPrice);
 
         const productActions = document.createElement('div');
         productActions.className = 'product-actions';
+
         const productLink = document.createElement('a');
         productLink.href = product.link;
         productLink.target = '_blank';
         productLink.rel = 'noopener noreferrer';
         productLink.className = 'product-link';
         productLink.textContent = 'קישור לרכישה 🔗';
+
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.className = 'remove-product-btn';
         removeButton.dataset.id = product.id;
         removeButton.title = 'הסר מוצר';
         removeButton.textContent = '🗑️';
+
         productActions.append(productLink, removeButton);
         productItem.append(productInfo, productActions);
 
         productsListContainer.appendChild(productItem);
     });
     
-    // עדכון סכום העלויות הכולל לאחר טעינת המוצרים
     updateTotalPrice();
-    
-    // הפעלת האזנה לכפתורי ההסרה של המוצרים שהרגע הזרקנו
     initRemoveButtons();
 }
 
-
 /**
  * פונקציה 2: updateTotalPrice
- * תפקיד: מחשבת את סכום המחירים של כל המוצרים הנויימים ברשימה ומעדכנת את התגית בדף.
  */
 function updateTotalPrice() {
     const totalPriceSpan = document.getElementById('total-price');
     if (!totalPriceSpan) return;
 
-    // חישוב סכום כל המחירים במערך באמצעות פונקציית reduce
     const total = designProducts.reduce((sum, product) => sum + product.price, 0);
-    
-    // הצגת הסכום המעודכן במסך
     totalPriceSpan.textContent = total.toLocaleString();
 }
 
-
 /**
  * פונקציה 3: initRemoveButtons
- * תפקיד: מאזינה ללחיצות על כפתורי המחיקה (פח) של המוצרים ומוחקת אותם מהמערך.
  */
 function initRemoveButtons() {
     const removeButtons = document.querySelectorAll('.remove-product-btn');
 
     removeButtons.forEach(button => {
         button.addEventListener('click', (e) => {
-            // שליפת ה-ID של המוצר מתוך מאפיין ה-data-id
             const productId = parseInt(e.currentTarget.getAttribute('data-id'), 10);
-                        
-            // סינון המערך כך שיישאר כל מוצר שאינו ה-ID שנמחק
             designProducts = designProducts.filter(product => product.id !== productId);
-            
-            // רינדור מחדש של הרשימה והמחיר
             renderProducts();
         });
     });
 }
 
-
-
 /**
  * פונקציה 4: initAddCustomProduct
- * תפקיד: מאפשרת למשתמש להוסיף מוצר חדש בהתאמה אישית לרשימה.
  */
 function initAddCustomProduct() {
     const addBtn = document.getElementById('add-custom-product-btn');
     if (!addBtn) return;
 
     addBtn.addEventListener('click', () => {
-        // קבלת שם המוצר והמחיר מהמשתמש באמצעות תיבות קלט פשוטות
         const productName = prompt('הכנס את שם המוצר או האקססורי החדש:');
         if (!productName || productName.trim() === '') return;
 
@@ -150,76 +149,78 @@ function initAddCustomProduct() {
         const productPrice = parseFloat(productPriceInput);
 
         if (isNaN(productPrice) || productPrice < 0) {
-            alert('אנא הכנס מחיר תקין.'); // הערה: מותר להשתמש ב-alert/prompt במסגרת לוגיקת לקוח פנימית בעת קלט
+            alert('אנא הכנס מחיר תקין.');
             return;
         }
 
-        // יצירת אובייקט מוצר חדש והוספתו למערך
         const newProduct = {
-            id: Date.now(), // יצירת מזהה ייחודי מבוסס זמן
+            id: Date.now(),
             name: productName.trim(),
             price: productPrice,
             link: 'https://example.com'
         };
 
         designProducts.push(newProduct);
-
-        // עדכון התצוגה בדף
         renderProducts();
     });
 }
 
-
 /**
  * פונקציה 5: initPrintAndSave
- * תפקיד: מנהלת את פעולות ההדפסה של העמוד ושמירת ההדמיה לזיכרון המקומי (LocalStorage).
+ * תפקיד: מדפיסה ושומרת את ההדמיה תחת המפתח האחיד ai-home-designs עבור האזור האישי
  */
 function initPrintAndSave() {
     const printBtn = document.getElementById('print-btn');
     const saveBtn = document.getElementById('save-btn');
 
-    // פעולת הדפסה
     if (printBtn) {
         printBtn.addEventListener('click', () => {
             window.print();
         });
     }
 
-    // פעולת שמירה לדף הלקוח (Dashboard)
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
-            const savedDesignsKey = getSavedDesignsKey();
+            const user = getCurrentUser();
+            const storedRequest = JSON.parse(sessionStorage.getItem('designRequest') || '{}');
 
             let savedDesigns = [];
             try {
-                const storedDesigns = JSON.parse(localStorage.getItem(savedDesignsKey));
-                savedDesigns = Array.isArray(storedDesigns) ? storedDesigns : [];
+                const stored = JSON.parse(localStorage.getItem(DESIGNS_KEY));
+                savedDesigns = Array.isArray(stored) ? stored : [];
             } catch {
                 savedDesigns = [];
             }
             
+            // שמירת אובייקט עם השדות שהאזור האישי (client-dashboard) מצפה לקבל
             const newDesignRecord = {
-                id: Date.now(),
+                id: Date.now().toString(),
+                userId: user?.id || user?._id || 'guest',
+                name: storedRequest.roomType ? `עיצוב ${storedRequest.roomType}` : 'עיצוב חדש',
+                roomType: storedRequest.roomType || 'סלון',
+                style: storedRequest.style || 'מודרני',
                 date: new Date().toLocaleDateString('he-IL'),
-                imageSrc: document.getElementById('result-image')?.src || '',
+                imageSrc: document.getElementById('result-image')?.src || '../../assets/images/placeholder-room.jpg',
+                imageUrl: document.getElementById('result-image')?.src || '../../assets/images/placeholder-room.jpg',
                 totalPrice: designProducts.reduce((sum, p) => sum + p.price, 0),
                 productsCount: designProducts.length
             };
 
             savedDesigns.push(newDesignRecord);
-            localStorage.setItem(savedDesignsKey, JSON.stringify(savedDesigns));
+            localStorage.setItem(DESIGNS_KEY, JSON.stringify(savedDesigns));
 
             alert('ההדמיה נשמרה בהצלחה באזור האישי שלך!');
         });
     }
 }
 
-// הפעלת כל המערכת מיד טעינת ה-DOM במלואו
+// הפעלת המערכת בטעינת ה-DOM
 document.addEventListener('DOMContentLoaded', () => {
     if (!requireAuth()) {
         return;
     }
 
+    loadWizardRequestData();
     renderProducts();
     initAddCustomProduct();
     initPrintAndSave();
