@@ -1,26 +1,16 @@
 
-function checkAuthState() {
-    const token = localStorage.getItem('token');
-    const rawUser = localStorage.getItem('user');
+async function checkAuthState() {
     const authBtn = document.getElementById('auth-btn');
+    const user = await window.authApi.getCurrentUser().catch(() => null);
 
-    if (!token || !rawUser) {
+    if (!user) {
         if (authBtn) {
             authBtn.textContent = 'התחברות / הרשמה';
             authBtn.href = '../auth/login.html';
         }
-        return false;
+        return null;
     }
 
-    let user;
-    try {
-        user = JSON.parse(rawUser);
-    } catch (error) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '../auth/login.html';
-        return false;
-    }
     const isAdmin = String(user?.role || 'User').toLowerCase() === 'admin';
 
     if (authBtn) {
@@ -30,10 +20,10 @@ function checkAuthState() {
 
     if (isAdmin) {
         window.location.href = '../admin-dashboard/admin-dashboard.html';
-        return true;
+        return user;
     }
 
-    return true;
+    return user;
 }
 
 
@@ -57,7 +47,7 @@ function setupRoomFields() {
     updateRoomFields();
 }
 
-const API_BASE_URL = 'http://localhost:1000/api';
+const API_BASE_URL = `http://${window.location.hostname}:1000/api`;
 
 function setupDesignRequestForm() {
     const form = document.getElementById('design-request-form');
@@ -90,9 +80,9 @@ function setupDesignRequestForm() {
         try {
             const response = await fetch(`${API_BASE_URL}/renders`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     text,
@@ -107,9 +97,7 @@ function setupDesignRequestForm() {
             const result = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(result.message || 'יצירת ההדמיה נכשלה.');
 
-            sessionStorage.setItem('designRequest', JSON.stringify(submission));
-            sessionStorage.setItem('designResult', JSON.stringify(result));
-            window.location.href = '../result/result.html';
+            window.location.href = `../result/result.html?id=${encodeURIComponent(result.id)}`;
         } catch (error) {
             alert(error.message || 'לא ניתן ליצור הדמיה כרגע.');
             submitButton.disabled = false;
@@ -117,16 +105,15 @@ function setupDesignRequestForm() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const isAuthenticated = checkAuthState();
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = await checkAuthState();
 
-    if (!isAuthenticated) {
+    if (!user) {
         window.location.href = '../auth/login.html';
         return;
     }
 
-    const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
-    if (currentUser && String(currentUser.role || 'User').toLowerCase() === 'admin') {
+    if (String(user.role || 'User').toLowerCase() === 'admin') {
         window.location.href = '../admin-dashboard/admin-dashboard.html';
         return;
     }

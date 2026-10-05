@@ -40,59 +40,10 @@
     <section class="panel">
       <div class="panel-header">
         <div>
-          <p class="eyebrow">ניהול</p>
+          <p class="eyebrow">החשבון שלי</p>
           <h1>הדמיות</h1>
         </div>
-        <button id="new-design-btn" class="primary-btn" type="button">＋ הוספת הדמיה</button>
       </div>
-
-      <form id="design-form" class="design-form">
-        <input type="hidden" id="design-id">
-
-        <label>
-          <span>שם ההדמיה</span>
-          <input id="design-name" name="name" type="text" placeholder="לדוגמה: חדר שינה מודרני" required>
-        </label>
-
-        <label>
-          <span>סוג החדר</span>
-          <select id="design-room" name="roomType" required>
-            <option value="">בחר סוג חדר</option>
-            <option value="סלון">סלון</option>
-            <option value="חדר שינה">חדר שינה</option>
-            <option value="מטבח">מטבח</option>
-            <option value="חדר ילדים">חדר ילדים</option>
-            <option value="משרד ביתי">משרד ביתי</option>
-          </select>
-        </label>
-
-        <label>
-          <span>סגנון</span>
-          <select id="design-style" name="style" required>
-            <option value="">בחר סגנון</option>
-            <option value="מודרני">מודרני</option>
-            <option value="כפרי">כפרי</option>
-            <option value="לופט">לופט</option>
-            <option value="קלאסי">קלאסי</option>
-            <option value="מינימליסטי">מינימליסטי</option>
-          </select>
-        </label>
-
-        <label>
-          <span>תקציב</span>
-          <input id="design-budget" name="budget" type="number" min="0" step="100" placeholder="15000" required>
-        </label>
-
-        <label class="full-width">
-          <span>הערות</span>
-          <textarea id="design-notes" name="notes" rows="4" placeholder="תאר את המראה הרצוי..."></textarea>
-        </label>
-
-        <div class="form-actions">
-          <button type="submit" class="primary-btn">שמור</button>
-          <button id="cancel-edit-btn" type="button" class="secondary-btn">ביטול</button>
-        </div>
-      </form>
     </section>
 
     <section class="panel list-panel">

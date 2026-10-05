@@ -2,19 +2,9 @@
  * קובץ result.js - ניהול הלוגיקה של דף תוצאת העיצוב
  */
 
-function getCurrentUser() {
-    try {
-        return JSON.parse(localStorage.getItem('user') || 'null');
-    } catch {
-        return null;
-    }
-}
-
-function requireAuth() {
-    const token = localStorage.getItem('token');
-    const user = getCurrentUser();
-
-    if (!token || !user) {
+async function requireAuth() {
+    const user = await window.authApi.getCurrentUser().catch(() => null);
+    if (!user) {
         window.location.href = '../auth/login.html';
         return false;
     }
@@ -22,35 +12,67 @@ function requireAuth() {
     return true;
 }
 
-// מפתח אחיד לשמירת עיצובים בדומה לאזור האישי
-const DESIGNS_KEY = 'ai-home-designs';
-const designResult = JSON.parse(sessionStorage.getItem('designResult') || 'null');
-let designProducts = Array.isArray(designResult?.items)
-    ? designResult.items.map((item, index) => ({ ...item, id: item._id || index + 1, price: Number(item.price || 0) }))
-    : [];
+// API for stored renders
+const API_BASE_URL = `http://${window.location.hostname}:1000/api`;
+let designResult = null;
+let designProducts = [];
+
+async function loadDesignResult() {
+    const renderId = new URLSearchParams(window.location.search).get('id');
+    if (!renderId) throw new Error('לא נמצא מזהה של ההדמיה.');
+
+    const response = await fetch(`${API_BASE_URL}/renders/${encodeURIComponent(renderId)}`, {
+        credentials: 'include'
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || 'טעינת ההדמיה נכשלה.');
+
+    designResult = result;
+    designProducts = Array.isArray(result.items)
+        ? result.items.map((item, index) => ({ ...item, id: item._id || index + 1, price: Number(item.price || 0) }))
+        : [];
+}
+
+async function saveDesignProducts(items = designProducts) {
+    const response = await fetch(`${API_BASE_URL}/renders/${encodeURIComponent(designResult.id)}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ items })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || 'שמירת רשימת הפריטים נכשלה.');
+    designProducts = Array.isArray(result.items)
+        ? result.items.map((item, index) => ({ ...item, id: item._id || index + 1, price: Number(item.price || 0) }))
+        : items;
+}
 
 /**
- * פונקציה: loadWizardRequestData
- * תפקיד: קוראת את נתוני הבקשה שנשמרו מהטופס (wizard.html) ומעדכנת את התצוגה בדף
+ * טוענת את פרטי בקשת העיצוב ומעדכנת את הכותרת והתוצאה.
  */
 function loadWizardRequestData() {
-    try {
-        const storedRequest = sessionStorage.getItem('designRequest');
-        if (!storedRequest) return;
-
-        const requestData = JSON.parse(storedRequest);
-        
-        // עדכון כותרת או פרטים בדף אם הקיימים אלמנטים מתאימים
-        const titleElement = document.getElementById('result-title');
-        if (titleElement && requestData.roomType) {
-            titleElement.textContent = `עיצוב עבור ${requestData.roomType} בסגנון ${requestData.style || 'מודרני'}`;
-        }
-
-        const resultImage = document.getElementById('result-image');
-        if (resultImage && designResult?.resultImage) resultImage.src = designResult.resultImage;
-    } catch (e) {
-        console.error('שגיאה שטעינת נתוני הבקשה:', e);
+    const titleElement = document.getElementById('result-title');
+    const roomType = designResult?.formDetails?.roomType;
+    const style = designResult?.formDetails?.style;
+    if (titleElement && roomType) {
+        titleElement.textContent = `עיצוב עבור ${roomType}${style ? ` בסגנון ${style}` : ''}`;
     }
+
+    const resultImage = document.getElementById('result-image');
+    const imageUnavailable = document.getElementById('image-unavailable');
+    if (designResult?.resultImage) {
+        resultImage.src = designResult.resultImage;
+        resultImage.hidden = false;
+        imageUnavailable.hidden = true;
+    } else {
+        resultImage.hidden = true;
+        imageUnavailable.hidden = false;
+    }
+
+    const summary = document.getElementById('result-summary');
+    if (summary) summary.textContent = designResult?.summary || '';
 }
 
 /**
@@ -126,9 +148,14 @@ function initRemoveButtons() {
 
     removeButtons.forEach(button => {
         button.addEventListener('click', (e) => {
-            const productId = parseInt(e.currentTarget.getAttribute('data-id'), 10);
-            designProducts = designProducts.filter(product => product.id !== productId);
-            renderProducts();
+            const productId = e.currentTarget.getAttribute('data-id');
+            const previousProducts = designProducts;
+            designProducts = designProducts.filter(product => String(product.id) !== productId);
+            saveDesignProducts().then(renderProducts).catch((error) => {
+                designProducts = previousProducts;
+                renderProducts();
+                alert(error.message || 'שמירת רשימת הפריטים נכשלה.');
+            });
         });
     });
 }
@@ -156,17 +183,20 @@ function initAddCustomProduct() {
             id: Date.now(),
             name: productName.trim(),
             price: productPrice,
-            link: 'https://example.com'
+            link: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(productName.trim())}`
         };
 
         designProducts.push(newProduct);
-        renderProducts();
+        saveDesignProducts().then(renderProducts).catch((error) => {
+            designProducts = designProducts.filter(product => product.id !== newProduct.id);
+            renderProducts();
+            alert(error.message || 'שמירת רשימת הפריטים נכשלה.');
+        });
     });
 }
 
 /**
- * פונקציה 5: initPrintAndSave
- * תפקיד: מדפיסה ושומרת את ההדמיה תחת המפתח האחיד ai-home-designs עבור האזור האישי
+ * מדפיסה את התוצאה ושומרת שינויים ברשימת הפריטים במסד.
  */
 function initPrintAndSave() {
     const printBtn = document.getElementById('print-btn');
@@ -179,43 +209,28 @@ function initPrintAndSave() {
     }
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-            const user = getCurrentUser();
-            const storedRequest = JSON.parse(sessionStorage.getItem('designRequest') || '{}');
-
-            let savedDesigns = [];
+        saveBtn.addEventListener('click', async () => {
             try {
-                const stored = JSON.parse(localStorage.getItem(DESIGNS_KEY));
-                savedDesigns = Array.isArray(stored) ? stored : [];
-            } catch {
-                savedDesigns = [];
+                await saveDesignProducts();
+                alert('ההדמיה ורשימת הפריטים נשמרו בחשבון שלך.');
+            } catch (error) {
+                alert(error.message || 'שמירת ההדמיה נכשלה.');
             }
-            
-            // שמירת אובייקט עם השדות שהאזור האישי (client-dashboard) מצפה לקבל
-            const newDesignRecord = {
-                id: designResult?.id || Date.now().toString(),
-                userId: user?.id || user?._id || 'guest',
-                name: storedRequest.roomType ? `עיצוב ${storedRequest.roomType}` : 'עיצוב חדש',
-                roomType: storedRequest.roomType || 'סלון',
-                style: storedRequest.style || 'מודרני',
-                date: new Date().toLocaleDateString('he-IL'),
-                imageSrc: document.getElementById('result-image')?.src || '../../assets/images/placeholder-room.jpg',
-                imageUrl: document.getElementById('result-image')?.src || '../../assets/images/placeholder-room.jpg',
-                totalPrice: designProducts.reduce((sum, p) => sum + p.price, 0),
-                productsCount: designProducts.length
-            };
-
-            savedDesigns.push(newDesignRecord);
-            localStorage.setItem(DESIGNS_KEY, JSON.stringify(savedDesigns));
-
-            alert('ההדמיה נשמרה בהצלחה באזור האישי שלך!');
         });
     }
 }
 
 // הפעלת המערכת בטעינת ה-DOM
-document.addEventListener('DOMContentLoaded', () => {
-    if (!requireAuth()) {
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!await requireAuth()) {
+        return;
+    }
+
+    try {
+        await loadDesignResult();
+    } catch (error) {
+        alert(error.message || 'טעינת ההדמיה נכשלה.');
+        window.location.href = '../client-dashboard/client-dashboard.html';
         return;
     }
 

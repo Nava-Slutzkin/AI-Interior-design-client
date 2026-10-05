@@ -1,23 +1,13 @@
-const CURRENT_USER_KEY = 'ai-home-current-user';
-const API_BASE_URL = 'http://localhost:1000/api';
+const API_BASE_URL = `http://${window.location.hostname}:1000/api`;
 let users = [];
 let designs = [];
 let currentUserId = '';
 
-function getCurrentUser() {
-  try {
-    return JSON.parse(localStorage.getItem('user') || localStorage.getItem(CURRENT_USER_KEY) || 'null');
-  } catch {
-    return null;
-  }
-}
-
 async function apiRequest(path, options = {}) {
   const headers = new Headers(options.headers || {});
-  headers.set('Authorization', `Bearer ${localStorage.getItem('token')}`);
   if (options.body) headers.set('Content-Type', 'application/json');
 
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers, credentials: 'include' });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.message || 'הבקשה לשרת נכשלה.');
   return result;
@@ -319,22 +309,19 @@ async function deleteDesign(designId) {
   }
 }
 
-function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  localStorage.removeItem(CURRENT_USER_KEY);
+async function logout() {
+  await window.authApi.logout();
   window.location.href = '../auth/login.html';
 }
 
 // טעינה ואבטחת גישה ללוח המנהל
-document.addEventListener('DOMContentLoaded', () => {
-  const user = getCurrentUser();
-  const token = localStorage.getItem('token');
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await window.authApi.getCurrentUser().catch(() => null);
 
   const isAdmin = user && String(user.role || '').toLowerCase() === 'admin';
 
   // בדיקת אימות והרשאה: הפניה לטופס התחברות אם המשתמש אינו מנהל
-  if (!token || !user || !isAdmin) {
+  if (!user || !isAdmin) {
     alert('אין לך הרשאה לצפות בדף זה.');
     window.location.href = '../auth/login.html';
     return;
