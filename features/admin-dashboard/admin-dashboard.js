@@ -15,8 +15,8 @@ function getDesigns() {
 }
 
 function getCurrentUser() {
-  const user = localStorage.getItem(CURRENT_USER_KEY);
-  return user ? JSON.parse(user) : { id: 'u-2', name: 'מנהל', email: 'admin@example.com', role: 'admin' };
+  const user = localStorage.getItem('user') || localStorage.getItem(CURRENT_USER_KEY);
+  return user ? JSON.parse(user) : null;
 }
 
 function ensureSeedData() {
@@ -81,14 +81,26 @@ function renderStatCards() {
 
 function renderBars(containerId, data) {
   const container = document.getElementById(containerId);
+  if (!container) return;
+  
   const max = Math.max(...data.map((item) => item.value), 1);
+  container.innerHTML = '';
 
-  container.innerHTML = data.map((item) => `
-    <div class="bar-group">
-      <div class="bar" style="height:${(item.value / max) * 100}%"></div>
-      <div class="bar-label">${item.label}</div>
-    </div>
-  `).join('');
+  data.forEach((item) => {
+    const group = document.createElement('div');
+    group.className = 'bar-group';
+
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = `${(item.value / max) * 100}%`;
+
+    const label = document.createElement('div');
+    label.className = 'bar-label';
+    label.textContent = item.label;
+
+    group.append(bar, label);
+    container.appendChild(group);
+  });
 }
 
 function renderCharts() {
@@ -99,107 +111,155 @@ function renderCharts() {
   renderBars('designs-chart', buildMonthlyStats(designs));
 }
 
+// יצירת טבלת משתמשים בצורה מאובטחת (XSS Safe)
 function renderUsersTable() {
   const users = getUsers();
   const tableContainer = document.getElementById('users-table');
+  if (!tableContainer) return;
+
+  tableContainer.innerHTML = '';
 
   if (!users.length) {
-    tableContainer.innerHTML = '<div class="empty-state">אין משתמשים להצגה.</div>';
+    const emptyState = document.createElement('div');
+    emptyState.className = 'empty-state';
+    emptyState.textContent = 'אין משתמשים להצגה.';
+    tableContainer.appendChild(emptyState);
     return;
   }
 
-  tableContainer.innerHTML = `
-    <table class="table">
-      <thead>
-        <tr>
-          <th>שם</th>
-          <th>מייל</th>
-          <th>טלפון</th>
-          <th>הרשאה</th>
-          <th>פעולות</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${users.map((user) => `
-          <tr>
-            <td>${user.name}</td>
-            <td>${user.email}</td>
-            <td>${user.phone || '-'}</td>
-            <td>
-              <select class="role-select" data-role-user-id="${user.id}">
-                <option value="client" ${user.role === 'client' ? 'selected' : ''}>לקוח</option>
-                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>מנהל</option>
-              </select>
-            </td>
-            <td>
-              <button class="action-btn delete-btn" type="button" data-delete-user-id="${user.id}">מחיקה</button>
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
+  const table = document.createElement('table');
+  table.className = 'table';
+
+  const thead = document.createElement('thead');
+  thead.innerHTML = `
+    <tr>
+      <th>שם</th>
+      <th>מייל</th>
+      <th>טלפון</th>
+      <th>הרשאה</th>
+      <th>פעולות</th>
+    </tr>
   `;
 
-  tableContainer.querySelectorAll('[data-role-user-id]').forEach((select) => {
-    select.addEventListener('change', (event) => {
-      const userId = event.target.dataset.roleUserId;
-      const nextRole = event.target.value;
-      const usersList = getUsers();
-      const updated = usersList.map((user) => user.id === userId ? { ...user, role: nextRole } : user);
+  const tbody = document.createElement('tbody');
+
+  users.forEach((user) => {
+    const tr = document.createElement('tr');
+
+    const tdName = document.createElement('td');
+    tdName.textContent = user.name;
+
+    const tdEmail = document.createElement('td');
+    tdEmail.textContent = user.email;
+
+    const tdPhone = document.createElement('td');
+    tdPhone.textContent = user.phone || '-';
+
+    const tdRole = document.createElement('td');
+    const selectRole = document.createElement('select');
+    selectRole.className = 'role-select';
+    
+    const optClient = document.createElement('option');
+    optClient.value = 'client';
+    optClient.textContent = 'לקוח';
+    optClient.selected = user.role === 'client';
+
+    const optAdmin = document.createElement('option');
+    optAdmin.value = 'admin';
+    optAdmin.textContent = 'מנהל';
+    optAdmin.selected = user.role === 'admin';
+
+    selectRole.append(optClient, optAdmin);
+    selectRole.addEventListener('change', (e) => {
+      const nextRole = e.target.value;
+      const updated = getUsers().map((u) => u.id === user.id ? { ...u, role: nextRole } : u);
       saveUsers(updated);
       renderUsersTable();
     });
+    tdRole.appendChild(selectRole);
+
+    const tdActions = document.createElement('td');
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'action-btn delete-btn';
+    deleteBtn.type = 'button';
+    deleteBtn.textContent = 'מחיקה';
+    deleteBtn.addEventListener('click', () => deleteUser(user.id));
+    tdActions.appendChild(deleteBtn);
+
+    tr.append(tdName, tdEmail, tdPhone, tdRole, tdActions);
+    tbody.appendChild(tr);
   });
 
-  tableContainer.querySelectorAll('[data-delete-user-id]').forEach((button) => {
-    button.addEventListener('click', () => deleteUser(button.dataset.deleteUserId));
-  });
+  table.append(thead, tbody);
+  tableContainer.appendChild(table);
 }
 
+// יצירת טבלת עיצובים בצורה מאובטחת (XSS Safe)
 function renderDesignsTable() {
   const designs = getDesigns();
   const tableContainer = document.getElementById('designs-table');
+  if (!tableContainer) return;
+
+  tableContainer.innerHTML = '';
 
   if (!designs.length) {
-    tableContainer.innerHTML = '<div class="empty-state">אין הדמיות להצגה.</div>';
+    const emptyState = document.createElement('div');
+    emptyState.className = 'empty-state';
+    emptyState.textContent = 'אין הדמיות להצגה.';
+    tableContainer.appendChild(emptyState);
     return;
   }
 
-  tableContainer.innerHTML = `
-    <table class="table">
-      <thead>
-        <tr>
-          <th>שם</th>
-          <th>יוצר</th>
-          <th>סגנון</th>
-          <th>תקציב</th>
-          <th>פעולה</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${designs.map((design) => `
-          <tr>
-            <td>${design.name}</td>
-            <td>${design.ownerName || 'לא ידוע'}</td>
-            <td>${design.style}</td>
-            <td>${Number(design.budget || 0).toLocaleString('he-IL')} ₪</td>
-            <td>
-              <button class="action-btn delete-btn" type="button" data-delete-design-id="${design.id}">מחיקה</button>
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
+  const table = document.createElement('table');
+  table.className = 'table';
+
+  const thead = document.createElement('thead');
+  thead.innerHTML = `
+    <tr>
+      <th>שם</th>
+      <th>יוצר</th>
+      <th>סגנון</th>
+      <th>תקציב</th>
+      <th>פעולה</th>
+    </tr>
   `;
 
-  tableContainer.querySelectorAll('[data-delete-design-id]').forEach((button) => {
-    button.addEventListener('click', () => deleteDesign(button.dataset.deleteDesignId));
+  const tbody = document.createElement('tbody');
+
+  designs.forEach((design) => {
+    const tr = document.createElement('tr');
+
+    const tdName = document.createElement('td');
+    tdName.textContent = design.name;
+
+    const tdOwner = document.createElement('td');
+    tdOwner.textContent = design.ownerName || 'לא ידוע';
+
+    const tdStyle = document.createElement('td');
+    tdStyle.textContent = design.style;
+
+    const tdBudget = document.createElement('td');
+    tdBudget.textContent = `${Number(design.budget || 0).toLocaleString('he-IL')} ₪`;
+
+    const tdActions = document.createElement('td');
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'action-btn delete-btn';
+    deleteBtn.type = 'button';
+    deleteBtn.textContent = 'מחיקה';
+    deleteBtn.addEventListener('click', () => deleteDesign(design.id));
+    tdActions.appendChild(deleteBtn);
+
+    tr.append(tdName, tdOwner, tdStyle, tdBudget, tdActions);
+    tbody.appendChild(tr);
   });
+
+  table.append(thead, tbody);
+  tableContainer.appendChild(table);
 }
 
 function deleteUser(userId) {
   const current = getCurrentUser();
-  if (userId === current.id) {
+  if (current && userId === current.id) {
     alert('לא ניתן למחוק את המשתמש הנוכחי.');
     return;
   }
@@ -228,15 +288,30 @@ function deleteDesign(designId) {
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  localStorage.removeItem(CURRENT_USER_KEY);
   window.location.href = '../auth/login.html';
 }
 
+// טעינה ואבטחת גישה ללוח המנהל
 document.addEventListener('DOMContentLoaded', () => {
+  const user = getCurrentUser();
+  const token = localStorage.getItem('token');
+
+  // בדיקת אימות והרשאה: הפניה לטופס התחברות אם המשתמש אינו מנהל
+  if (!token || !user || user.role !== 'admin') {
+    alert('אין לך הרשאה לצפות בדף זה.');
+    window.location.href = '../auth/login.html';
+    return;
+  }
+
   ensureSeedData();
   renderStatCards();
   renderCharts();
   renderUsersTable();
   renderDesignsTable();
 
-  document.getElementById('logout-btn').addEventListener('click', logout);
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', logout);
+  }
 });

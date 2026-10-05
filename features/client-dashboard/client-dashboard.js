@@ -2,6 +2,16 @@ const CURRENT_USER_KEY = 'ai-home-current-user';
 const USERS_KEY = 'ai-home-users';
 const DESIGNS_KEY = 'ai-home-designs';
 
+document.addEventListener('DOMContentLoaded', () => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  
+  // אם אין משתמש מחובר או שהוא אינו מנהל - הפניה לדף התחברות
+  if (!user || user.role !== 'admin') {
+    alert('גישה מורשית למנהלים בלבד');
+    window.location.href = '../auth/login.html';
+  }
+});
+
 function getCurrentUser() {
   try {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');

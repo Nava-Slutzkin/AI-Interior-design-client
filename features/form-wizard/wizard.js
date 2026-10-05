@@ -21,10 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="form-group">
                     <label for="room-type">סוג החדר:</label>
                     <select id="room-type" name="roomType">
-                        <option value="living-room">סלון</option>
-                        <option value="kitchen">מטבח</option>
-                        <option value="bedroom">חדר שינה</option>
-                        <option value="office">משרד ביתי</option>
+                        <option value="סלון">סלון</option>
+                        <option value="מטבח">מטבח</option>
+                        <option value="חדר שינה">חדר שינה</option>
+                        <option value="משרד ביתי">משרד ביתי</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -37,6 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
             title: 'עיצוב בהשראת תמונה קיימת',
             subtitle: 'העלה תמונה של החלל הנוכחי או תמונת השראה.',
             fields: `
+                <div class="form-group">
+                    <label for="room-type">סוג החדר:</label>
+                    <select id="room-type" name="roomType">
+                        <option value="סלון">סלון</option>
+                        <option value="מטבח">מטבח</option>
+                        <option value="חדר שינה">חדר שינה</option>
+                        <option value="משרד ביתי">משרד ביתי</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label for="image-upload">בחר תמונה מהמכשיר:</label>
                     <input type="file" id="image-upload" name="imageUpload" accept="image/*">
@@ -54,19 +63,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="form-group">
                     <label for="structured-room-type">סוג החדר:</label>
                     <select id="structured-room-type" name="roomType" required>
-                        <option value="living-room">סלון</option>
-                        <option value="kitchen">מטבח</option>
-                        <option value="bedroom">חדר שינה</option>
-                        <option value="office">משרד ביתי</option>
+                        <option value="סלון">סלון</option>
+                        <option value="מטבח">מטבח</option>
+                        <option value="חדר שינה">חדר שינה</option>
+                        <option value="משרד ביתי">משרד ביתי</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="design-style">סגנון עיצוב:</label>
-                    <select id="design-style" name="designStyle" required>
-                        <option value="modern">מודרני</option>
-                        <option value="minimal">מינימליסטי</option>
-                        <option value="rustic">כפרי</option>
-                        <option value="classic">קלאסי</option>
+                    <select id="design-style" name="style" required>
+                        <option value="מודרני">מודרני</option>
+                        <option value="מינימליסטי">מינימליסטי</option>
+                        <option value="כפרי">כפרי</option>
+                        <option value="קלאסי">קלאסי</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -80,6 +89,15 @@ document.addEventListener('DOMContentLoaded', () => {
             subtitle: 'ספר לנו בקולך על הדרישות העיצוביות.',
             fields: `
                 <div class="form-group">
+                    <label for="room-type">סוג החדר:</label>
+                    <select id="room-type" name="roomType">
+                        <option value="סלון">סלון</option>
+                        <option value="מטבח">מטבח</option>
+                        <option value="חדר שינה">חדר שינה</option>
+                        <option value="משרד ביתי">משרד ביתי</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <p>לחץ על הכפתור כדי להתחיל להקליט את הבקשה שלך</p>
                     <button type="button" id="record-btn">התחל הקלטה</button>
                     <p id="record-status"></p>
@@ -88,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-      // פונקציה להזרקת השדות המתאימים לתוך מסך האשף
+    // פונקציה להזרקת השדות המתאימים לתוך מסך האשף
     function renderWizardFields() {
         const currentConfig = configurations[inputType] || configurations.text;
         
@@ -121,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initFormSubmission() {
         if (!wizardForm) return;
 
-        wizardForm.addEventListener('submit', (e) => {
+        wizardForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             // הסתרת הטופס והצגת מצב הטעינה
@@ -131,7 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const formData = new FormData(wizardForm);
-            const submission = Object.fromEntries(formData.entries());
+            const submission = {};
+
+            // מעבר על השדות והמרת קובצי תמונה במידה והועלו
+            for (const [key, value] of formData.entries()) {
+                if (value instanceof File && value.size > 0) {
+                    try {
+                        submission.uploadedImageUrl = await readFileAsDataURL(value);
+                    } catch (err) {
+                        console.error('שגיאה בקריאת הקובץ:', err);
+                    }
+                } else if (typeof value === 'string') {
+                    submission[key] = value;
+                }
+            }
+
             sessionStorage.setItem('designRequest', JSON.stringify({ type: inputType, ...submission }));
 
             setTimeout(() => {
@@ -140,12 +172,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // פונקציית עזר להמרת קובץ תמונה ל-Data URL
+    function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
     // הפעלה ראשונית של הפונקציות לפי הסדר
     renderWizardFields();
     initAudioRecorder();
     initFormSubmission();
 });
-
-
-
-
