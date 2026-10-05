@@ -102,8 +102,13 @@ function saveAuthData(data) {
     }
 
     if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-        localStorage.setItem('ai-home-current-user', JSON.stringify(user));
+        const normalizedUser = {
+            ...user,
+            role: String(user.role || 'User')
+        };
+
+        localStorage.setItem('user', JSON.stringify(normalizedUser));
+        localStorage.setItem('ai-home-current-user', JSON.stringify(normalizedUser));
     }
 }
 
@@ -127,9 +132,10 @@ async function handleLoginSubmit(event) {
         const response = await sendRequest('/auth/login', payload);
         saveAuthData(response);
 
-        showMessage('התחברת בהצלחה! מעביר אותך לעמוד הבית...', 'success');
+        const isAdmin = String(response?.user?.role || response?.data?.user?.role || 'User').toLowerCase() === 'admin';
+        showMessage(isAdmin ? 'התחברת בהצלחה! מעביר אותך ללוח הניהול...' : 'התחברת בהצלחה! מעביר אותך לעמוד הבית...', 'success');
         setTimeout(() => {
-            window.location.href = '../home/index.html';
+            window.location.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../home/index.html';
         }, 900);
     } catch (error) {
         showMessage(error.message || 'אירעה שגיאה בהתחברות', 'error');
@@ -156,9 +162,10 @@ async function handleRegisterSubmit(event) {
         const response = await sendRequest('/auth/register', payload);
         saveAuthData(response);
 
-        showMessage('החשבון נוצר בהצלחה! מעביר אותך לעמוד הבית...', 'success');
+        const isAdmin = String(response?.user?.role || response?.data?.user?.role || 'User').toLowerCase() === 'admin';
+        showMessage(isAdmin ? 'החשבון נוצר בהצלחה! מעביר אותך ללוח הניהול...' : 'החשבון נוצר בהצלחה! מעביר אותך לעמוד הבית...', 'success');
         setTimeout(() => {
-            window.location.href = '../home/index.html';
+            window.location.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../home/index.html';
         }, 900);
     } catch (error) {
         showMessage(error.message || 'אירעה שגיאה בהרשמה', 'error');
@@ -176,7 +183,13 @@ forms.login.addEventListener('submit', handleLoginSubmit);
 forms.register.addEventListener('submit', handleRegisterSubmit);
 
 if (localStorage.getItem('token') && localStorage.getItem('user')) {
-    window.location.href = '../home/index.html';
+    try {
+        const savedUser = JSON.parse(localStorage.getItem('user'));
+        const isAdmin = String(savedUser?.role || 'User').toLowerCase() === 'admin';
+        window.location.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../home/index.html';
+    } catch (error) {
+        window.location.href = '../home/index.html';
+    }
 }
 
 setActiveTab('login');

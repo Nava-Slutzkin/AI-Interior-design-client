@@ -3,12 +3,16 @@ const USERS_KEY = 'ai-home-users';
 const DESIGNS_KEY = 'ai-home-designs';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  
-  // אם אין משתמש מחובר או שהוא אינו מנהל - הפניה לדף התחברות
-  if (!user || user.role !== 'admin') {
-    alert('גישה מורשית למנהלים בלבד');
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+  if (!user) {
+    alert('יש להתחבר כדי להיכנס לאזור האישי.');
     window.location.href = '../auth/login.html';
+    return;
+  }
+
+  if (String(user.role || 'User').toLowerCase() === 'admin') {
+    window.location.href = '../admin-dashboard/admin-dashboard.html';
   }
 });
 

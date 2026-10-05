@@ -5,21 +5,31 @@
  */
 function checkAuthState() {
     const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
+    const rawUser = localStorage.getItem('user');
     const authBtn = document.getElementById('auth-btn');
 
-    if (token && user && authBtn) {
-        authBtn.textContent = 'אזור אישי 👤';
-        authBtn.href = '../client-dashboard/client-dashboard.html';
+    if (!token || !rawUser) {
+        if (authBtn) {
+            authBtn.textContent = 'התחברות / הרשמה';
+            authBtn.href = '../auth/login.html';
+        }
+        return false;
+    }
+
+    const user = JSON.parse(rawUser);
+    const isAdmin = String(user?.role || 'User').toLowerCase() === 'admin';
+
+    if (authBtn) {
+        authBtn.textContent = isAdmin ? 'לוח מנהל 👤' : 'אזור אישי 👤';
+        authBtn.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../client-dashboard/client-dashboard.html';
+    }
+
+    if (isAdmin) {
+        window.location.href = '../admin-dashboard/admin-dashboard.html';
         return true;
     }
 
-    if (authBtn) {
-        authBtn.textContent = 'התחברות / הרשמה';
-        authBtn.href = '../auth/login.html';
-    }
-
-    return !!(token && user);
+    return true;
 }
 
 
@@ -61,6 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!isAuthenticated) {
         window.location.href = '../auth/login.html';
+        return;
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+    if (currentUser && String(currentUser.role || 'User').toLowerCase() === 'admin') {
+        window.location.href = '../admin-dashboard/admin-dashboard.html';
         return;
     }
 

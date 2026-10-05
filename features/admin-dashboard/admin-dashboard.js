@@ -297,8 +297,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const user = getCurrentUser();
   const token = localStorage.getItem('token');
 
+  const isAdmin = user && String(user.role || '').toLowerCase() === 'admin';
+
   // בדיקת אימות והרשאה: הפניה לטופס התחברות אם המשתמש אינו מנהל
-  if (!token || !user || user.role !== 'admin') {
+  if (!token || !user || !isAdmin) {
     alert('אין לך הרשאה לצפות בדף זה.');
     window.location.href = '../auth/login.html';
     return;
