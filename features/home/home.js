@@ -57,7 +57,10 @@ function setupDesignRequestForm() {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const submitButton = form.querySelector('[type="submit"]');
+        const generationOverlay = document.getElementById('generation-overlay');
         submitButton.disabled = true;
+        form.setAttribute('aria-busy', 'true');
+        generationOverlay.hidden = false;
 
         const formData = new FormData(form);
         form.querySelectorAll('[data-room-group][hidden] [name]').forEach((field) => {
@@ -99,6 +102,8 @@ function setupDesignRequestForm() {
 
             window.location.href = `../result/result.html?id=${encodeURIComponent(result.id)}`;
         } catch (error) {
+            generationOverlay.hidden = true;
+            form.removeAttribute('aria-busy');
             alert(error.message || 'לא ניתן ליצור הדמיה כרגע.');
             submitButton.disabled = false;
         }

@@ -212,6 +212,17 @@
             <button class="submit-btn" type="submit">המשך ליצירת ההדמיה <span aria-hidden="true">←</span></button>
         </div>
     </form>
+
+    <div id="generation-overlay" class="generation-overlay" hidden aria-live="polite" aria-busy="true">
+        <section class="generation-dialog" role="status" aria-labelledby="generation-title">
+            <div class="generation-spinner" aria-hidden="true"></div>
+            <p class="generation-eyebrow">הבקשה התקבלה</p>
+            <h2 id="generation-title">בונים את תוכנית העיצוב</h2>
+            <p class="generation-message">אנחנו מנתחים את פרטי החדר ומרכיבים הצעה ורשימת רהיטים שמתאימות למה שביקשת.</p>
+            <div class="generation-progress" aria-hidden="true"><span></span></div>
+            <p class="generation-note">ההצעה תישמר בחשבון שלך לפני המעבר לתוצאה.</p>
+        </section>
+    </div>
 </main>
 
 <footer>
