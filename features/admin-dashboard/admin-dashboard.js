@@ -1,49 +1,44 @@
-const USERS_KEY = 'ai-home-users';
-const DESIGNS_KEY = 'ai-home-designs';
 const CURRENT_USER_KEY = 'ai-home-current-user';
-
-function getUsers() {
-  return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-function getDesigns() {
-  return JSON.parse(localStorage.getItem(DESIGNS_KEY) || '[]');
-}
+const API_BASE_URL = 'http://localhost:1000/api';
+let users = [];
+let designs = [];
+let currentUserId = '';
 
 function getCurrentUser() {
-  const user = localStorage.getItem('user') || localStorage.getItem(CURRENT_USER_KEY);
-  return user ? JSON.parse(user) : null;
+  try {
+    return JSON.parse(localStorage.getItem('user') || localStorage.getItem(CURRENT_USER_KEY) || 'null');
+  } catch {
+    return null;
+  }
 }
 
-function ensureSeedData() {
-  if (!localStorage.getItem(USERS_KEY)) {
-    const users = [
-      { id: 'u-1', name: 'מיכאל כהן', email: 'michael@example.com', phone: '0501234567', role: 'client' },
-      { id: 'u-2', name: 'מנהל', email: 'admin@example.com', phone: '0509999999', role: 'admin' },
-      { id: 'u-3', name: 'שירה לוי', email: 'shira@example.com', phone: '0507654321', role: 'client' }
-    ];
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  }
+async function apiRequest(path, options = {}) {
+  const headers = new Headers(options.headers || {});
+  headers.set('Authorization', `Bearer ${localStorage.getItem('token')}`);
+  if (options.body) headers.set('Content-Type', 'application/json');
 
-  if (!localStorage.getItem(DESIGNS_KEY)) {
-    const designs = [
-      { id: 'd-1', userId: 'u-1', ownerName: 'מיכאל כהן', name: 'חדר שינה מינימליסטי', roomType: 'חדר שינה', style: 'מינימליסטי', budget: 18000, notes: 'גוונים בהירים', createdAt: '2025-01-10T09:00:00.000Z' },
-      { id: 'd-2', userId: 'u-1', ownerName: 'מיכאל כהן', name: 'סלון מודרני', roomType: 'סלון', style: 'מודרני', budget: 25000, notes: 'ריהוט נקי', createdAt: '2025-02-14T11:30:00.000Z' },
-      { id: 'd-3', userId: 'u-3', ownerName: 'שירה לוי', name: 'מטבח כפרי', roomType: 'מטבח', style: 'כפרי', budget: 22000, notes: 'עץ ושיש', createdAt: '2025-03-09T08:15:00.000Z' },
-      { id: 'd-4', userId: 'u-2', ownerName: 'מנהל', name: 'משרד ביתי', roomType: 'משרד ביתי', style: 'מודרני', budget: 16000, notes: 'עיצוב פונקציונלי', createdAt: '2025-04-19T15:00:00.000Z' }
-    ];
-    localStorage.setItem(DESIGNS_KEY, JSON.stringify(designs));
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.message || 'הבקשה לשרת נכשלה.');
+  return result;
+}
+
+function showMessage(message, isError = false) {
+  let element = document.getElementById('dashboard-message');
+  if (!element) {
+    element = document.createElement('p');
+    element.id = 'dashboard-message';
+    element.setAttribute('role', 'status');
+    document.querySelector('.dashboard-shell').prepend(element);
   }
+  element.textContent = message;
+  element.classList.toggle('error-message', isError);
 }
 
 function calculateTopStyle(items) {
   const counts = {};
   items.forEach((item) => {
-    counts[item.style] = (counts[item.style] || 0) + 1;
+    if (item.style && item.style !== '-') counts[item.style] = (counts[item.style] || 0) + 1;
   });
 
   const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
@@ -61,7 +56,9 @@ function buildMonthlyStats(items) {
   const counts = {};
 
   items.forEach((item) => {
-    const date = new Date(item.createdAt || Date.now());
+    if (!item.createdAt) return;
+    const date = new Date(item.createdAt);
+    if (Number.isNaN(date.getTime())) return;
     const month = monthNames[date.getMonth()];
     counts[month] = (counts[month] || 0) + 1;
   });
@@ -70,9 +67,6 @@ function buildMonthlyStats(items) {
 }
 
 function renderStatCards() {
-  const users = getUsers();
-  const designs = getDesigns();
-
   document.getElementById('total-users').textContent = String(users.length);
   document.getElementById('total-designs').textContent = String(designs.length);
   document.getElementById('top-style').textContent = calculateTopStyle(designs);
@@ -104,16 +98,12 @@ function renderBars(containerId, data) {
 }
 
 function renderCharts() {
-  const users = getUsers();
-  const designs = getDesigns();
-
   renderBars('users-chart', buildMonthlyStats(users));
   renderBars('designs-chart', buildMonthlyStats(designs));
 }
 
 // יצירת טבלת משתמשים בצורה מאובטחת (XSS Safe)
 function renderUsersTable() {
-  const users = getUsers();
   const tableContainer = document.getElementById('users-table');
   if (!tableContainer) return;
 
@@ -147,7 +137,7 @@ function renderUsersTable() {
     const tr = document.createElement('tr');
 
     const tdName = document.createElement('td');
-    tdName.textContent = user.name;
+    tdName.textContent = user.name || '-';
 
     const tdEmail = document.createElement('td');
     tdEmail.textContent = user.email;
@@ -160,22 +150,20 @@ function renderUsersTable() {
     selectRole.className = 'role-select';
     
     const optClient = document.createElement('option');
-    optClient.value = 'client';
+    optClient.value = 'User';
     optClient.textContent = 'לקוח';
-    optClient.selected = user.role === 'client';
+    optClient.selected = user.role === 'User';
 
     const optAdmin = document.createElement('option');
-    optAdmin.value = 'admin';
+    optAdmin.value = 'Admin';
     optAdmin.textContent = 'מנהל';
-    optAdmin.selected = user.role === 'admin';
+    optAdmin.selected = user.role === 'Admin';
 
     selectRole.append(optClient, optAdmin);
     selectRole.addEventListener('change', (e) => {
-      const nextRole = e.target.value;
-      const updated = getUsers().map((u) => u.id === user.id ? { ...u, role: nextRole } : u);
-      saveUsers(updated);
-      renderUsersTable();
+      updateUserRole(user.id, e.target.value, selectRole);
     });
+    selectRole.disabled = user.id === currentUserId;
     tdRole.appendChild(selectRole);
 
     const tdActions = document.createElement('td');
@@ -183,6 +171,7 @@ function renderUsersTable() {
     deleteBtn.className = 'action-btn delete-btn';
     deleteBtn.type = 'button';
     deleteBtn.textContent = 'מחיקה';
+    deleteBtn.disabled = user.id === currentUserId;
     deleteBtn.addEventListener('click', () => deleteUser(user.id));
     tdActions.appendChild(deleteBtn);
 
@@ -196,7 +185,6 @@ function renderUsersTable() {
 
 // יצירת טבלת עיצובים בצורה מאובטחת (XSS Safe)
 function renderDesignsTable() {
-  const designs = getDesigns();
   const tableContainer = document.getElementById('designs-table');
   if (!tableContainer) return;
 
@@ -230,13 +218,13 @@ function renderDesignsTable() {
     const tr = document.createElement('tr');
 
     const tdName = document.createElement('td');
-    tdName.textContent = design.name;
+    tdName.textContent = design.name || 'עיצוב';
 
     const tdOwner = document.createElement('td');
     tdOwner.textContent = design.ownerName || 'לא ידוע';
 
     const tdStyle = document.createElement('td');
-    tdStyle.textContent = design.style;
+    tdStyle.textContent = design.style || '-';
 
     const tdBudget = document.createElement('td');
     tdBudget.textContent = `${Number(design.budget || 0).toLocaleString('he-IL')} ₪`;
@@ -257,32 +245,78 @@ function renderDesignsTable() {
   tableContainer.appendChild(table);
 }
 
-function deleteUser(userId) {
-  const current = getCurrentUser();
-  if (current && userId === current.id) {
-    alert('לא ניתן למחוק את המשתמש הנוכחי.');
-    return;
-  }
+async function loadDashboardData() {
+  showMessage('טוען נתונים מהמסד...');
+  const [usersResponse, rendersResponse] = await Promise.all([
+    apiRequest('/admin/users'),
+    apiRequest('/admin/renders')
+  ]);
 
-  const nextUsers = getUsers().filter((user) => user.id !== userId);
-  const nextDesigns = getDesigns().filter((design) => design.userId !== userId);
-
-  saveUsers(nextUsers);
-  localStorage.setItem(DESIGNS_KEY, JSON.stringify(nextDesigns));
+  users = usersResponse.map((user) => ({
+    ...user,
+    id: String(user._id || user.id),
+    role: String(user.role || 'User').toLowerCase() === 'admin' ? 'Admin' : 'User'
+  }));
+  designs = rendersResponse.map((render) => ({
+    ...render,
+    id: String(render.id || render._id),
+    userId: String(render.userId || ''),
+    budget: Number(render.budget || 0)
+  }));
 
   renderStatCards();
   renderCharts();
   renderUsersTable();
   renderDesignsTable();
+  showMessage('הנתונים נטענו מהמסד.');
 }
 
-function deleteDesign(designId) {
-  const nextDesigns = getDesigns().filter((design) => design.id !== designId);
-  localStorage.setItem(DESIGNS_KEY, JSON.stringify(nextDesigns));
+async function updateUserRole(userId, role, selectElement) {
+  selectElement.disabled = true;
+  try {
+    await apiRequest(`/admin/users/${encodeURIComponent(userId)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ role })
+    });
+    users = users.map((user) => user.id === userId ? { ...user, role } : user);
+    renderUsersTable();
+    showMessage('הרשאת המשתמש עודכנה.');
+  } catch (error) {
+    alert(error.message);
+    renderUsersTable();
+  }
+}
 
-  renderStatCards();
-  renderCharts();
-  renderDesignsTable();
+async function deleteUser(userId) {
+  if (userId === currentUserId || !confirm('למחוק את המשתמש ואת ההדמיות שלו?')) return;
+
+  try {
+    await apiRequest(`/admin/users/${encodeURIComponent(userId)}`, { method: 'DELETE' });
+    users = users.filter((user) => user.id !== userId);
+    designs = designs.filter((design) => design.userId !== userId);
+    renderStatCards();
+    renderCharts();
+    renderUsersTable();
+    renderDesignsTable();
+    showMessage('המשתמש נמחק מהמסד.');
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function deleteDesign(designId) {
+  if (!confirm('למחוק את ההדמיה מהמסד?')) return;
+
+  try {
+    await apiRequest(`/admin/renders/${encodeURIComponent(designId)}`, { method: 'DELETE' });
+    designs = designs.filter((design) => design.id !== designId);
+    renderStatCards();
+    renderCharts();
+    renderDesignsTable();
+    showMessage('ההדמיה נמחקה מהמסד.');
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
 function logout() {
@@ -306,11 +340,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  ensureSeedData();
-  renderStatCards();
-  renderCharts();
-  renderUsersTable();
-  renderDesignsTable();
+  currentUserId = String(user._id || user.id || '');
+  const nameElement = document.getElementById('current-user-name');
+  if (nameElement) nameElement.textContent = user.name || user.email || '';
+
+  loadDashboardData().catch((error) => {
+    showMessage(`לא ניתן לטעון נתונים מהמסד: ${error.message}`, true);
+  });
 
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {

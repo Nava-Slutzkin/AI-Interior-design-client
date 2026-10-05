@@ -57,13 +57,17 @@ function setupRoomFields() {
     updateRoomFields();
 }
 
+const API_BASE_URL = 'http://localhost:1000/api';
+
 function setupDesignRequestForm() {
     const form = document.getElementById('design-request-form');
     const customRoomField = document.getElementById('custom-room-field');
     const customRoomInput = customRoomField.querySelector('input');
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
+        const submitButton = form.querySelector('[type="submit"]');
+        submitButton.disabled = true;
 
         const formData = new FormData(form);
         form.querySelectorAll('[data-room-group][hidden] [name]').forEach((field) => {
@@ -78,8 +82,38 @@ function setupDesignRequestForm() {
             submission.roomType = submission.customRoomType.trim();
         }
 
-        sessionStorage.setItem('designRequest', JSON.stringify({ type: 'form', ...submission }));
-        window.location.href = '../result/result.html';
+        const text = Object.entries(submission)
+            .filter(([, value]) => value)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join('. ');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/renders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    text,
+                    formDetails: {
+                        roomType: submission.roomType,
+                        style: submission.style,
+                        budget: Number(submission.budget) || 0,
+                        dimensions: submission.roomSize || ''
+                    }
+                })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.message || 'יצירת ההדמיה נכשלה.');
+
+            sessionStorage.setItem('designRequest', JSON.stringify(submission));
+            sessionStorage.setItem('designResult', JSON.stringify(result));
+            window.location.href = '../result/result.html';
+        } catch (error) {
+            alert(error.message || 'לא ניתן ליצור הדמיה כרגע.');
+            submitButton.disabled = false;
+        }
     });
 }
 

@@ -24,6 +24,11 @@ function requireAuth() {
 
 // מפתח אחיד לשמירת עיצובים בדומה לאזור האישי
 const DESIGNS_KEY = 'ai-home-designs';
+const designResult = JSON.parse(sessionStorage.getItem('designResult') || 'null');
+let designProducts = Array.isArray(designResult?.items)
+    ? designResult.items.map((item, index) => ({ ...item, id: item._id || index + 1, price: Number(item.price || 0) }))
+    : [];
+
 /**
  * פונקציה: loadWizardRequestData
  * תפקיד: קוראת את נתוני הבקשה שנשמרו מהטופס (wizard.html) ומעדכנת את התצוגה בדף
@@ -40,6 +45,9 @@ function loadWizardRequestData() {
         if (titleElement && requestData.roomType) {
             titleElement.textContent = `עיצוב עבור ${requestData.roomType} בסגנון ${requestData.style || 'מודרני'}`;
         }
+
+        const resultImage = document.getElementById('result-image');
+        if (resultImage && designResult?.resultImage) resultImage.src = designResult.resultImage;
     } catch (e) {
         console.error('שגיאה שטעינת נתוני הבקשה:', e);
     }
@@ -185,7 +193,7 @@ function initPrintAndSave() {
             
             // שמירת אובייקט עם השדות שהאזור האישי (client-dashboard) מצפה לקבל
             const newDesignRecord = {
-                id: Date.now().toString(),
+                id: designResult?.id || Date.now().toString(),
                 userId: user?.id || user?._id || 'guest',
                 name: storedRequest.roomType ? `עיצוב ${storedRequest.roomType}` : 'עיצוב חדש',
                 roomType: storedRequest.roomType || 'סלון',
