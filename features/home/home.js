@@ -1,8 +1,4 @@
 
-/**
- * פונקציה 1: בודקת אם קיים Token ב-localStorage
- * ומעדכנת דינמית את הכפתור בסרגל העליון
- */
 function checkAuthState() {
     const token = localStorage.getItem('token');
     const rawUser = localStorage.getItem('user');
@@ -41,37 +37,50 @@ function checkAuthState() {
 }
 
 
-/**
- * פונקציה 2: מחברת מאזיני אירועים (Event Listeners) לכל הכרטיסים בעלי data-input-type
- */
-function setupOptionListeners() {
-    // שליפת כל ה-Cards שקיימת לגביהם התכונה data-input-type
-    const optionCards = document.querySelectorAll('[data-input-type]');
+function setupRoomFields() {
+    const roomType = document.getElementById('room-type');
+    const customRoomField = document.getElementById('custom-room-field');
+    const customRoomInput = customRoomField.querySelector('input');
+    const roomGroups = document.querySelectorAll('[data-room-group]');
 
-    optionCards.forEach(card => {
-        card.addEventListener('click', () => {
-            // חילוץ סוג הקלט מתוך התכונה data-input-type של הכרטיס
-            const inputType = card.getAttribute('data-input-type');
-            
-            // קריאה לפונקציית הניווט
-            navigateToWizard(inputType);
+    function updateRoomFields() {
+        const selectedRoom = roomType.value;
+        customRoomField.hidden = selectedRoom !== 'חלל אחר';
+        customRoomInput.required = selectedRoom === 'חלל אחר';
+
+        roomGroups.forEach((group) => {
+            group.hidden = group.dataset.roomGroup !== selectedRoom;
         });
-    });
-}
-
-
-/**
- * פונקציה 3: מנווטת לדף הביניים (Wizard) עם הפרמטר ב-URL
- * @param {string} inputType - 'image' | 'text' | 'form' | 'audio'
- */
-function navigateToWizard(inputType) {
-    if (!inputType) {
-        console.error('לא נבחר סוג קלט תקין');
-        return;
     }
 
-    // מעבר לדף הביניים תוך העברת סוג הקלט כ-Query Parameter
-    window.location.href = `../form-wizard/wizard.html?type=${encodeURIComponent(inputType)}`;
+    roomType.addEventListener('change', updateRoomFields);
+    updateRoomFields();
+}
+
+function setupDesignRequestForm() {
+    const form = document.getElementById('design-request-form');
+    const customRoomField = document.getElementById('custom-room-field');
+    const customRoomInput = customRoomField.querySelector('input');
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        form.querySelectorAll('[data-room-group][hidden] [name]').forEach((field) => {
+            formData.delete(field.name);
+        });
+        if (customRoomField.hidden) {
+            formData.delete(customRoomInput.name);
+        }
+
+        const submission = Object.fromEntries(formData.entries());
+        if (submission.roomType === 'חלל אחר') {
+            submission.roomType = submission.customRoomType.trim();
+        }
+
+        sessionStorage.setItem('designRequest', JSON.stringify({ type: 'form', ...submission }));
+        window.location.href = '../result/result.html';
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -88,5 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    setupOptionListeners();
+    setupRoomFields();
+    setupDesignRequestForm();
 });

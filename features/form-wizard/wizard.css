@@ -134,29 +134,6 @@ body {
     padding: 0.5rem 0;
 }
 
-#record-btn {
-    background-color: #334155;
-    color: #38bdf8;
-    border: 1px solid #38bdf8;
-    padding: 0.75rem 1.25rem;
-    border-radius: 6px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    width: fit-content;
-}
-
-#record-btn:hover {
-    background-color: #38bdf8;
-    color: #0f172a;
-}
-
-#record-status {
-    color: #94a3b8;
-    font-size: 0.9rem;
-    margin-top: 0.25rem;
-}
-
 .form-actions {
     margin-top: 2rem;
 }
