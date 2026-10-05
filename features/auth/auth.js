@@ -93,23 +93,26 @@ async function sendRequest(endpoint, payload) {
     return result;
 }
 
-function saveAuthData(data) {
-    const token = data.token || data.accessToken || data.jwt || data.data?.token;
-    const user = data.user || data.data?.user || data.account || { name: data.name || data.username };
+function saveAuthData(data, fallbackUser) {
+    const responseData = data.data || data;
+    const token = data.token || data.accessToken || data.jwt || responseData.token || responseData.accessToken || responseData.jwt;
 
-    if (token) {
-        localStorage.setItem('token', token);
+    if (!token) {
+        throw new Error('השרת לא החזיר אסימון התחברות. לא ניתן להתחבר כרגע.');
     }
 
-    if (user) {
-        const normalizedUser = {
-            ...user,
-            role: String(user.role || 'User')
-        };
+    const user = data.user || responseData.user || data.account || {};
+    const normalizedUser = {
+        ...fallbackUser,
+        ...user,
+        name: user.name || user.fullName || fallbackUser.name || user.email || fallbackUser.email,
+        role: String(user.role || fallbackUser.role || 'User')
+    };
 
-        localStorage.setItem('user', JSON.stringify(normalizedUser));
-        localStorage.setItem('ai-home-current-user', JSON.stringify(normalizedUser));
-    }
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(normalizedUser));
+    localStorage.setItem('ai-home-current-user', JSON.stringify(normalizedUser));
+    return normalizedUser;
 }
 
 async function handleLoginSubmit(event) {
@@ -130,9 +133,9 @@ async function handleLoginSubmit(event) {
         showMessage('מתחבר...', 'success');
 
         const response = await sendRequest('/auth/login', payload);
-        saveAuthData(response);
+        const user = saveAuthData(response, { name: email, email });
 
-        const isAdmin = String(response?.user?.role || response?.data?.user?.role || 'User').toLowerCase() === 'admin';
+        const isAdmin = String(user.role).toLowerCase() === 'admin';
         showMessage(isAdmin ? 'התחברת בהצלחה! מעביר אותך ללוח הניהול...' : 'התחברת בהצלחה! מעביר אותך לעמוד הבית...', 'success');
         setTimeout(() => {
             window.location.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../home/index.html';
@@ -160,9 +163,9 @@ async function handleRegisterSubmit(event) {
         showMessage('יוצר חשבון...', 'success');
 
         const response = await sendRequest('/auth/register', payload);
-        saveAuthData(response);
+        const user = saveAuthData(response, payload);
 
-        const isAdmin = String(response?.user?.role || response?.data?.user?.role || 'User').toLowerCase() === 'admin';
+        const isAdmin = String(user.role).toLowerCase() === 'admin';
         showMessage(isAdmin ? 'החשבון נוצר בהצלחה! מעביר אותך ללוח הניהול...' : 'החשבון נוצר בהצלחה! מעביר אותך לעמוד הבית...', 'success');
         setTimeout(() => {
             window.location.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../home/index.html';
@@ -188,7 +191,9 @@ if (localStorage.getItem('token') && localStorage.getItem('user')) {
         const isAdmin = String(savedUser?.role || 'User').toLowerCase() === 'admin';
         window.location.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../home/index.html';
     } catch (error) {
-        window.location.href = '../home/index.html';
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('ai-home-current-user');
     }
 }
 

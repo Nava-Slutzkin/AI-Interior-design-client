@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>לוח מנהל</title>
   <link rel="stylesheet" href="admin-dashboard.css">
+    <link rel="icon" type="image/png" href="../../Icon.png">
+
 </head>
 <body>
   <header class="topbar">
@@ -13,6 +15,7 @@
       <span>Admin Dashboard</span>
     </div>
     <nav class="nav-links">
+      <span class="user-name" id="current-user-name"></span>
       <a href="../home/index.html">דף הבית</a>
       <button id="logout-btn" class="ghost-btn" type="button">התנתקות</button>
     </nav>
@@ -81,5 +84,6 @@
   </main>
 
   <script src="admin-dashboard.js"></script>
+  <script src="../auth/session.js"></script>
 </body>
 </html>

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="wizard.css">
+      <link rel="icon" type="image/png" href="../../Icon.png">
+
 </head>
 <body>
 
@@ -14,6 +16,7 @@
         <span class="logo-text">AI Home Designer</span>
     </a>
     <nav class="user-nav">
+        <span class="user-name" id="current-user-name"></span>
         <a href="../home/index.html" class="btn-secondary">חזרה לדף הבית 🏠</a>
         <a href="../client-dashboard/client-dashboard.html" class="btn-secondary">ההדמיות שלי 📁</a>
     </nav>
@@ -56,6 +59,7 @@
 </footer>
 
 <script type="module" src="wizard.js"></script>
+<script src="../auth/session.js"></script>
 
     
 </body>

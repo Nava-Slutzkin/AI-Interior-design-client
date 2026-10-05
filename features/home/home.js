@@ -16,11 +16,19 @@ function checkAuthState() {
         return false;
     }
 
-    const user = JSON.parse(rawUser);
+    let user;
+    try {
+        user = JSON.parse(rawUser);
+    } catch (error) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '../auth/login.html';
+        return false;
+    }
     const isAdmin = String(user?.role || 'User').toLowerCase() === 'admin';
 
     if (authBtn) {
-        authBtn.textContent = isAdmin ? 'לוח מנהל 👤' : 'אזור אישי 👤';
+        authBtn.textContent = user.name || user.fullName || user.email || 'המשתמש שלי';
         authBtn.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../client-dashboard/client-dashboard.html';
     }
 

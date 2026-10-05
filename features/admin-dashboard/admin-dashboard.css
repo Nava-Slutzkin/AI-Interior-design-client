@@ -57,6 +57,11 @@ button, select {
   gap: 12px;
 }
 
+.user-name {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .nav-links a, .ghost-btn {
   text-decoration: none;
   background: transparent;

@@ -24,15 +24,6 @@ function requireAuth() {
 
 // מפתח אחיד לשמירת עיצובים בדומה לאזור האישי
 const DESIGNS_KEY = 'ai-home-designs';
-
-// מערך התחלתי המדמה את רשימת הרהיטים והאקססוריז
-let designProducts = [
-    { id: 1, name: 'ספה מעוצבת תלת מושבית', price: 3400, link: 'https://example.com/sofa' },
-    { id: 2, name: 'שולחן סלון בשילוב עץ ומתכת', price: 1200, link: 'https://example.com/table' },
-    { id: 3, name: 'שטיח סלון מודרני', price: 850, link: 'https://example.com/rug' },
-    { id: 4, name: 'מנורת עמידה מעוצבת', price: 450, link: 'https://example.com/lamp' }
-];
-
 /**
  * פונקציה: loadWizardRequestData
  * תפקיד: קוראת את נתוני הבקשה שנשמרו מהטופס (wizard.html) ומעדכנת את התצוגה בדף

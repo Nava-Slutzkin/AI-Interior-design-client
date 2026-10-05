@@ -43,6 +43,11 @@ body {
     align-items: center;
 }
 
+.user-name {
+    color: #f8fafc;
+    font-weight: 700;
+}
+
 .btn-secondary {
     background-color: #334155;
     color: #cbd5e1;

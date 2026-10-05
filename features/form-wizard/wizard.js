@@ -1,5 +1,10 @@
 // האזנה לטעינת המסמך המלא לפני הרצת הקוד
 document.addEventListener('DOMContentLoaded', () => {
+    if (!localStorage.getItem('token') || !localStorage.getItem('user')) {
+        window.location.href = '../auth/login.html';
+        return;
+    }
+
     
     // קריאת פרמטרים מכתובת ה-URL כדי לדעת איזה סוג אשף להציג
     const urlParams = new URLSearchParams(window.location.search);
