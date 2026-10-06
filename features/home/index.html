@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Home Designer</title>
     <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="../design-system.css">
       <link rel="icon" type="image/png" href="../../Icon.png">
 
 </head>
@@ -28,20 +29,20 @@
     </section>
 
     <form id="design-request-form" class="design-form">
-        <section class="form-section" aria-labelledby="space-heading">
+        <section class="form-section" aria-labelledby="brief-heading">
             <div class="section-heading">
                 <span class="section-index">01</span>
                 <div>
-                    <h2 id="space-heading">החלל הקיים</h2>
-                    <p>נתחיל מהבסיס ומהאופן שבו החדר משמש אותך היום.</p>
+                    <h2 id="brief-heading">מה תרצו לעצב?</h2>
+                    <p>כמה פרטים קצרים, והבינה המלאכותית תבנה לכם הצעה אישית.</p>
                 </div>
             </div>
 
             <div class="form-grid">
                 <label class="form-field">
-                    <span>איזה חלל מתכננים?</span>
-                    <select id="room-type" name="roomType" required>
-                        <option value="">בחרו סוג חלל</option>
+                    <span>סוג החלל</span>
+                    <select name="roomType" required>
+                        <option value="">בחרו חלל</option>
                         <option value="סלון">סלון</option>
                         <option value="חדר שינה">חדר שינה</option>
                         <option value="מטבח">מטבח</option>
@@ -49,167 +50,38 @@
                         <option value="חדר ילדים">חדר ילדים</option>
                         <option value="משרד ביתי">משרד ביתי</option>
                         <option value="פינת אוכל">פינת אוכל</option>
-                        <option value="כניסה לבית">כניסה לבית</option>
+                        <option value="מרפסת">מרפסת</option>
                         <option value="חלל אחר">חלל אחר</option>
                     </select>
                 </label>
-                <label class="form-field" id="custom-room-field" hidden>
-                    <span>מה סוג החלל?</span>
-                    <input type="text" name="customRoomType" placeholder="למשל: מרפסת או חדר ארונות">
-                </label>
                 <label class="form-field">
-                    <span>מידות משוערות</span>
-                    <input type="text" name="roomSize" placeholder="למשל: 4 × 5 מטרים, תקרה בגובה 2.8 מטר">
-                </label>
-                <label class="form-field">
-                    <span>תיאור המצב הנוכחי</span>
-                    <textarea name="currentState" rows="3" placeholder="מה כבר נמצא בחדר? מה עובד טוב ומה פחות?"></textarea>
-                </label>
-            </div>
-
-            <div id="room-specific-fields" class="conditional-fields" aria-live="polite">
-                <section class="room-fields" data-room-group="סלון" hidden>
-                    <h3>מה חשוב בסלון?</h3>
-                    <div class="form-grid">
-                        <label class="form-field"><span>איך משתמשים בו בעיקר?</span><select name="livingUse"><option value="">בחרו</option><option>אירוח</option><option>צפייה בטלוויזיה</option><option>זמן משפחתי</option><option>עבודה ומנוחה</option><option>שימוש משולב</option></select></label>
-                        <label class="form-field"><span>כמה מקומות ישיבה נדרשים?</span><input type="text" name="seatingNeeds" placeholder="למשל: 5 מקומות, כולל כורסה"></label>
-                        <label class="form-field"><span>פריטים שחשוב לשלב</span><input type="text" name="livingItems" placeholder="ספרייה, טלוויזיה, פסנתר, צעצועים..."></label>
-                    </div>
-                </section>
-                <section class="room-fields" data-room-group="חדר שינה" hidden>
-                    <h3>מה חשוב בחדר השינה?</h3>
-                    <div class="form-grid">
-                        <label class="form-field"><span>גודל המיטה</span><select name="bedSize"><option value="">בחרו</option><option>יחיד</option><option>זוגית</option><option>קווין סייז</option><option>קינג סייז</option><option>מיטת קומותיים</option></select></label>
-                        <label class="form-field"><span>צרכי אחסון</span><input type="text" name="bedroomStorage" placeholder="ארון גדול, שידות, אחסון מתחת למיטה..."></label>
-                        <label class="form-field"><span>מה עוד צריך להיכנס לחדר?</span><input type="text" name="bedroomItems" placeholder="פינת איפור, שולחן עבודה, עריסה..."></label>
-                    </div>
-                </section>
-                <section class="room-fields" data-room-group="מטבח" hidden>
-                    <h3>מה חשוב במטבח?</h3>
-                    <div class="form-grid">
-                        <label class="form-field"><span>איך מבשלים ומשתמשים במטבח?</span><input type="text" name="cookingHabits" placeholder="בישול יומיומי, אירוח, אפייה..."></label>
-                        <label class="form-field"><span>מכשירי חשמל שחייבים להישאר</span><input type="text" name="kitchenAppliances" placeholder="מקרר, תנור, מדיח, מכונת קפה..."></label>
-                        <label class="form-field"><span>מה חסר באחסון או במשטחי העבודה?</span><input type="text" name="kitchenNeeds" placeholder="מזווה, מגירות, אי, משטח הכנה גדול..."></label>
-                    </div>
-                </section>
-                <section class="room-fields" data-room-group="חדר רחצה" hidden>
-                    <h3>מה חשוב בחדר הרחצה?</h3>
-                    <div class="form-grid">
-                        <label class="form-field"><span>מי משתמש בחדר?</span><input type="text" name="bathroomUsers" placeholder="למשל: זוג, משפחה עם ילדים"></label>
-                        <label class="form-field"><span>מה צריך להישאר?</span><input type="text" name="bathroomFixtures" placeholder="אמבטיה, מקלחון, ארון כיור..."></label>
-                        <label class="form-field"><span>צרכים מיוחדים</span><input type="text" name="bathroomNeeds" placeholder="נגישות, אחסון, קלות ניקוי..."></label>
-                    </div>
-                </section>
-                <section class="room-fields" data-room-group="חדר ילדים" hidden>
-                    <h3>מה חשוב בחדר הילדים?</h3>
-                    <div class="form-grid">
-                        <label class="form-field"><span>גיל או גילאי הילדים</span><input type="text" name="childrenAges" placeholder="למשל: 4 ו-7"></label>
-                        <label class="form-field"><span>אילו פעילויות צריכות מקום?</span><input type="text" name="childrenActivities" placeholder="משחק, קריאה, יצירה, לימודים..."></label>
-                        <label class="form-field"><span>צרכי אחסון ובטיחות</span><input type="text" name="childrenNeeds" placeholder="צעצועים, ספרים, פינות בטוחות..."></label>
-                    </div>
-                </section>
-                <section class="room-fields" data-room-group="משרד ביתי" hidden>
-                    <h3>מה חשוב במשרד הביתי?</h3>
-                    <div class="form-grid">
-                        <label class="form-field"><span>כמה שעות עובדים בחדר?</span><input type="text" name="workHours" placeholder="למשל: יום עבודה מלא, כמה שעות בערב"></label>
-                        <label class="form-field"><span>ציוד שצריך מקום</span><input type="text" name="officeEquipment" placeholder="מסכים, מדפסת, ציוד צילום..."></label>
-                        <label class="form-field"><span>שיחות ופגישות מהבית?</span><select name="videoCalls"><option value="">בחרו</option><option>לעיתים קרובות</option><option>לפעמים</option><option>כמעט אף פעם</option></select></label>
-                    </div>
-                </section>
-                <section class="room-fields" data-room-group="פינת אוכל" hidden>
-                    <h3>מה חשוב בפינת האוכל?</h3>
-                    <div class="form-grid">
-                        <label class="form-field"><span>כמה סועדים ביום-יום?</span><input type="number" name="dailySeats" min="1" max="30" placeholder="למשל: 4"></label>
-                        <label class="form-field"><span>כמה באירוח?</span><input type="number" name="hostingSeats" min="1" max="30" placeholder="למשל: 8"></label>
-                        <label class="form-field"><span>שימושים נוספים באזור</span><input type="text" name="diningUses" placeholder="שיעורי בית, עבודה, משחקים..."></label>
-                    </div>
-                </section>
-                <section class="room-fields" data-room-group="כניסה לבית" hidden>
-                    <h3>מה חשוב בכניסה לבית?</h3>
-                    <div class="form-grid">
-                        <label class="form-field"><span>מה צריך להיות זמין ביציאה?</span><input type="text" name="entryItems" placeholder="מעילים, נעליים, מפתחות, תיקים..."></label>
-                        <label class="form-field"><span>כמה אנשים משתמשים בכניסה?</span><input type="number" name="entryUsers" min="1" max="20" placeholder="למשל: 4"></label>
-                    </div>
-                </section>
-                <section class="room-fields" data-room-group="חלל אחר" hidden>
-                    <h3>ספרו לנו על החלל</h3>
-                    <label class="form-field"><span>מה עושים בו ומה הוא צריך לכלול?</span><textarea name="otherRoomDetails" rows="3" placeholder="תארו את השימושים, הפריטים והאתגרים"></textarea></label>
-                </section>
-            </div>
-        </section>
-
-        <section class="form-section" aria-labelledby="style-heading">
-            <div class="section-heading">
-                <span class="section-index">02</span>
-                <div>
-                    <h2 id="style-heading">התחושה והעיצוב</h2>
-                    <p>אין צורך להכיר שמות של סגנונות. תארו מה נעים לכם ומה לא.</p>
-                </div>
-            </div>
-            <div class="form-grid">
-                <label class="form-field">
-                    <span>איזה כיוון עיצובי מושך אתכם?</span>
+                    <span>סגנון עיצובי</span>
                     <select name="style" required>
-                        <option value="">בחרו כיוון</option>
-                        <option value="מודרני">נקי ומודרני</option>
-                        <option value="מינימליסטי">פשוט ומינימליסטי</option>
-                        <option value="כפרי">חמים וכפרי</option>
-                        <option value="סקנדינבי">בהיר וסקנדינבי</option>
-                        <option value="קלאסי">קלאסי ועל-זמני</option>
-                        <option value="תעשייתי">אורבני ותעשייתי</option>
-                        <option value="אקלקטי">צבעוני ואקלקטי</option>
-                        <option value="פתוח להצעות">עדיין לא בטוחים</option>
+                        <option value="">בחרו סגנון</option>
+                        <option value="מודרני">מודרני</option>
+                        <option value="מינימליסטי">מינימליסטי</option>
+                        <option value="כפרי">כפרי וחמים</option>
+                        <option value="סקנדינבי">סקנדינבי</option>
+                        <option value="קלאסי">קלאסי</option>
+                        <option value="תעשייתי">תעשייתי</option>
+                        <option value="אקלקטי">אקלקטי וצבעוני</option>
+                        <option value="הפתיעו אותי">הפתיעו אותי</option>
                     </select>
                 </label>
-                <label class="form-field"><span>צבעים או גוונים שאתם אוהבים</span><input type="text" name="preferredColors" placeholder="למשל: ירוק עמוק, עץ טבעי, לבן חם"></label>
-                <label class="form-field"><span>צבעים או חומרים שתרצו להימנע מהם</span><input type="text" name="colorsToAvoid" placeholder="לא חובה"></label>
-                <label class="form-field"><span>איזו אווירה תרצו להרגיש?</span><input type="text" name="atmosphere" placeholder="רגועה, מוארת, יוקרתית, משפחתית..."></label>
                 <label class="form-field">
-                    <span>תאורה מועדפת</span>
-                    <select name="lighting">
-                        <option value="">בחרו או השאירו פתוח</option>
-                        <option>אור טבעי והרבה חלונות</option>
-                        <option>תאורה חמה ורכה</option>
-                        <option>תאורה חזקה וממוקדת</option>
-                        <option>שילוב של כמה סוגי תאורה</option>
-                        <option>פתוחים להצעה</option>
-                    </select>
+                    <span>תקציב משוער בשקלים <span class="optional">(לא חובה)</span></span>
+                    <input type="number" name="budget" min="0" step="500" placeholder="למשל 15000">
                 </label>
-                <label class="form-field"><span>מה חייב להישאר בחדר?</span><textarea name="mustKeep" rows="3" placeholder="רהיט, פריט, חלון או מאפיין שאסור לשנות"></textarea></label>
-            </div>
-        </section>
-
-        <section class="form-section" aria-labelledby="constraints-heading">
-            <div class="section-heading">
-                <span class="section-index">03</span>
-                <div>
-                    <h2 id="constraints-heading">העדפות ומגבלות</h2>
-                    <p>הפרטים הקטנים עוזרים להתאים את ההצעה לחיים האמיתיים.</p>
-                </div>
-            </div>
-            <div class="form-grid">
-                <label class="form-field"><span>תקציב משוער</span><input type="number" name="budget" min="0" step="500" placeholder="בשקלים"></label>
-                <label class="form-field">
-                    <span>מה הכי חשוב בתוצאה?</span>
-                    <select name="priority">
-                        <option value="">בחרו או השאירו פתוח</option>
-                        <option>ניצול חכם של המקום</option>
-                        <option>אחסון רב</option>
-                        <option>נוחות ותחזוקה קלה</option>
-                        <option>מראה מיוחד ומרשים</option>
-                        <option>עמידה בתקציב</option>
-                        <option>התאמה לילדים או לחיות מחמד</option>
-                    </select>
+                <label class="form-field form-field-wide">
+                    <span>מה חשוב לכם בחדר? <span class="optional">(לא חובה)</span></span>
+                    <textarea name="description" rows="4" placeholder="צבעים אהובים, רהיטים שיישארו, אווירה רצויה וכל פרט שיעזור לדייק..."></textarea>
                 </label>
-                <label class="form-field"><span>מי משתמש בחדר ביום-יום?</span><input type="text" name="usersAndNeeds" placeholder="ילדים, חיות מחמד, עבודה מהבית, נגישות..."></label>
-                <label class="form-field"><span>מה תרצו להימנע ממנו?</span><textarea name="avoid" rows="3" placeholder="צפיפות, תחזוקה מורכבת, צבע מסוים, רהיטים גדולים..."></textarea></label>
-                <label class="form-field form-field-wide"><span>עוד משהו שחשוב שנדע?</span><textarea name="additionalNotes" rows="4" placeholder="כל פרט נוסף שיעזור לנו לדייק את התכנון"></textarea></label>
             </div>
         </section>
 
         <div class="form-actions">
-            <p>אפשר להשאיר שדות לא רלוונטיים ריקים.</p>
-            <button class="submit-btn" type="submit">המשך ליצירת ההדמיה <span aria-hidden="true">←</span></button>
+            <p>אפשר ליצור עיצוב גם בלי תיאור נוסף.</p>
+            <button class="submit-btn" type="submit">צרו לי הדמיה עם AI <span aria-hidden="true">✦</span></button>
         </div>
     </form>
 

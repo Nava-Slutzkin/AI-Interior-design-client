@@ -1,13 +1,9 @@
-const API_BASE_URL = `http://${window.location.hostname}:1000/api`;
 let users = [];
 let designs = [];
 let currentUserId = '';
 
 async function apiRequest(path, options = {}) {
-  const headers = new Headers(options.headers || {});
-  if (options.body) headers.set('Content-Type', 'application/json');
-
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers, credentials: 'include' });
+  const response = await window.authApi.request(path, options);
   const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.message || 'הבקשה לשרת נכשלה.');
   return result;
@@ -251,7 +247,8 @@ async function loadDashboardData() {
     ...render,
     id: String(render.id || render._id),
     userId: String(render.userId || ''),
-    budget: Number(render.budget || 0)
+    budget: Number(render.formDetails?.budget || render.budget || 0),
+    style: render.formDetails?.style || render.style || '-'
   }));
 
   renderStatCards();

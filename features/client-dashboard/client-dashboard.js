@@ -1,4 +1,3 @@
-const API_BASE_URL = `http://${window.location.hostname}:1000/api`;
 let designs = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -96,9 +95,7 @@ async function loadDesigns() {
   const allDesigns = [];
 
   for (let page = 1; ; page += 1) {
-    const response = await fetch(`${API_BASE_URL}/renders?page=${page}&limit=${pageSize}`, {
-      credentials: 'include'
-    });
+    const response = await window.authApi.request(`/renders?page=${page}&limit=${pageSize}`);
     const result = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(result.message || 'טעינת ההדמיות נכשלה.');
@@ -118,10 +115,7 @@ async function deleteDesign(designId) {
   if (!window.confirm('למחוק את ההדמיה מהחשבון?')) return;
 
   try {
-    const response = await fetch(`${API_BASE_URL}/renders/${encodeURIComponent(designId)}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    });
+    const response = await window.authApi.request(`/renders/${encodeURIComponent(designId)}`, { method: 'DELETE' });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || 'מחיקת ההדמיה נכשלה.');
     await loadDesigns();

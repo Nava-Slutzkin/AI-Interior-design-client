@@ -16,9 +16,15 @@
             </div>
 
             <div class="brand" aria-label="AI Home Designer">
-                <span class="brand-icon">🏡</span>
-                <span>AI Home Designer</span>
+                <span class="brand-icon" aria-hidden="true">A</span>
+                <span><strong>Atelier</strong><small>AI HOME DESIGN</small></span>
             </div>
+
+            <div class="access-mode" role="group" aria-label="בחירת סוג חשבון">
+                <button class="mode-btn active" type="button" data-mode="User" aria-pressed="true">כניסת לקוחות</button>
+                <button class="mode-btn" type="button" data-mode="Admin" aria-pressed="false">כניסת מנהלים</button>
+            </div>
+            <p class="mode-note" id="mode-note">היכנסו כדי להתחיל לתכנן את החלל שלכם.</p>
 
             <div class="tab-switch" role="tablist" aria-label="בחירת מצב התחברות">
                 <button class="tab active" type="button" data-tab="login" aria-selected="true">התחברות</button>
@@ -69,12 +75,27 @@
                     <input id="register-confirm-password" name="confirmPassword" type="password" placeholder="הקלד שוב את הסיסמא" autocomplete="new-password" required>
                 </label>
 
-                <button type="submit" class="primary-btn">צור חשבון</button>
+                <label id="admin-code-field" hidden>
+                    <span>קוד הזמנה למנהל</span>
+                    <input id="admin-registration-code" name="adminCode" type="password" autocomplete="off" placeholder="קוד שנמסר על ידי מנהל המערכת">
+                </label>
+
+                <button type="submit" class="primary-btn"><span>צור חשבון</span><span aria-hidden="true">↗</span></button>
             </form>
 
             <div id="auth-message" class="message" aria-live="polite"></div>
         </div>
     </div>
+
+    <aside class="visual-panel" aria-label="חלל מגורים בעיצוב עכשווי">
+        <div class="visual-topline"><span>01 / 03</span><span>DESIGN YOUR EVERYDAY</span></div>
+        <div class="visual-copy">
+            <p class="visual-kicker">הבית מתחיל ברעיון</p>
+            <h1>חלל שנראה<br>כמוך.</h1>
+            <p>מתארים את מה שחשוב. מקבלים כיוון עיצובי שנבנה סביב החיים שלכם.</p>
+        </div>
+        <div class="visual-caption"><span class="caption-mark"></span><span>חומר. אור. מקום.</span><span>AI INTERIOR STUDIO</span></div>
+    </aside>
 
     <script src="auth.js"></script>
     <script src="session.js"></script>

@@ -27,32 +27,8 @@ async function checkAuthState() {
 }
 
 
-function setupRoomFields() {
-    const roomType = document.getElementById('room-type');
-    const customRoomField = document.getElementById('custom-room-field');
-    const customRoomInput = customRoomField.querySelector('input');
-    const roomGroups = document.querySelectorAll('[data-room-group]');
-
-    function updateRoomFields() {
-        const selectedRoom = roomType.value;
-        customRoomField.hidden = selectedRoom !== 'חלל אחר';
-        customRoomInput.required = selectedRoom === 'חלל אחר';
-
-        roomGroups.forEach((group) => {
-            group.hidden = group.dataset.roomGroup !== selectedRoom;
-        });
-    }
-
-    roomType.addEventListener('change', updateRoomFields);
-    updateRoomFields();
-}
-
-const API_BASE_URL = `http://${window.location.hostname}:1000/api`;
-
 function setupDesignRequestForm() {
     const form = document.getElementById('design-request-form');
-    const customRoomField = document.getElementById('custom-room-field');
-    const customRoomInput = customRoomField.querySelector('input');
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -63,37 +39,20 @@ function setupDesignRequestForm() {
         generationOverlay.hidden = false;
 
         const formData = new FormData(form);
-        form.querySelectorAll('[data-room-group][hidden] [name]').forEach((field) => {
-            formData.delete(field.name);
-        });
-        if (customRoomField.hidden) {
-            formData.delete(customRoomInput.name);
-        }
-
         const submission = Object.fromEntries(formData.entries());
-        if (submission.roomType === 'חלל אחר') {
-            submission.roomType = submission.customRoomType.trim();
-        }
-
-        const text = Object.entries(submission)
-            .filter(([, value]) => value)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join('. ');
+        const description = String(submission.description || '').trim();
+        const text = `צור הצעת עיצוב פנים בעברית עבור ${submission.roomType}, בסגנון ${submission.style}.${description ? ` העדפות נוספות: ${description}.` : ''}${submission.budget ? ` תקציב מקסימלי: ${submission.budget} ש"ח.` : ''}`;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/renders`, {
+            const response = await window.authApi.request('/renders', {
                 method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify({
                     text,
                     formDetails: {
                         roomType: submission.roomType,
                         style: submission.style,
                         budget: Number(submission.budget) || 0,
-                        dimensions: submission.roomSize || ''
+                        dimensions: ''
                     }
                 })
             });
@@ -123,6 +82,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    setupRoomFields();
     setupDesignRequestForm();
 });

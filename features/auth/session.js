@@ -1,25 +1,29 @@
-['token', 'user', 'ai-home-current-user', 'ai-home-users', 'ai-home-designs'].forEach((key) => {
-    window.localStorage.removeItem(key);
-});
-['designRequest', 'designResult'].forEach((key) => {
-    window.sessionStorage.removeItem(key);
-});
-
 window.authApi = {
     baseUrl: `http://${window.location.hostname}:1000/api`,
 
+    async request(path, options = {}) {
+        const headers = new Headers(options.headers || {});
+        const token = window.localStorage.getItem('token');
+        if (token) headers.set('Authorization', `Bearer ${token}`);
+        if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+        return fetch(`${this.baseUrl}${path}`, { ...options, headers });
+    },
+
     async getCurrentUser() {
-        const response = await fetch(`${this.baseUrl}/auth/me`, { credentials: 'include' });
+        const token = window.localStorage.getItem('token');
+        if (!token) return null;
+
+        const response = await this.request('/auth/me');
         if (!response.ok) return null;
         const result = await response.json();
+        if (result.user) window.localStorage.setItem('user', JSON.stringify(result.user));
         return result.user || null;
     },
 
     async logout() {
-        await fetch(`${this.baseUrl}/auth/logout`, {
-            method: 'POST',
-            credentials: 'include'
-        });
+        window.localStorage.removeItem('token');
+        window.localStorage.removeItem('user');
+        window.localStorage.removeItem('ai-home-current-user');
     }
 };
 

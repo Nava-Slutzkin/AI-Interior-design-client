@@ -13,7 +13,6 @@ async function requireAuth() {
 }
 
 // API for stored renders
-const API_BASE_URL = `http://${window.location.hostname}:1000/api`;
 let designResult = null;
 let designProducts = [];
 
@@ -21,9 +20,7 @@ async function loadDesignResult() {
     const renderId = new URLSearchParams(window.location.search).get('id');
     if (!renderId) throw new Error('לא נמצא מזהה של ההדמיה.');
 
-    const response = await fetch(`${API_BASE_URL}/renders/${encodeURIComponent(renderId)}`, {
-        credentials: 'include'
-    });
+    const response = await window.authApi.request(`/renders/${encodeURIComponent(renderId)}`);
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || 'טעינת ההדמיה נכשלה.');
 
@@ -34,12 +31,8 @@ async function loadDesignResult() {
 }
 
 async function saveDesignProducts(items = designProducts) {
-    const response = await fetch(`${API_BASE_URL}/renders/${encodeURIComponent(designResult.id)}`, {
+    const response = await window.authApi.request(`/renders/${encodeURIComponent(designResult.id)}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include',
         body: JSON.stringify({ items })
     });
     const result = await response.json().catch(() => ({}));
@@ -62,13 +55,18 @@ function loadWizardRequestData() {
 
     const resultImage = document.getElementById('result-image');
     const imageUnavailable = document.getElementById('image-unavailable');
-    if (designResult?.resultImage) {
+    if (designResult?.resultImage && designResult.imageGenerated !== false) {
         resultImage.src = designResult.resultImage;
         resultImage.hidden = false;
         imageUnavailable.hidden = true;
+        resultImage.onerror = () => {
+            resultImage.hidden = true;
+            imageUnavailable.hidden = false;
+        };
     } else {
         resultImage.hidden = true;
         imageUnavailable.hidden = false;
+        imageUnavailable.textContent = 'הצעת העיצוב נוצרה עם AI, אך יצירת תמונה אינה זמינה כרגע. ניתן לנסות שוב מאוחר יותר.';
     }
 
     const summary = document.getElementById('result-summary');

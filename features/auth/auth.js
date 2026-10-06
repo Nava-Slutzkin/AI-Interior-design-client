@@ -6,6 +6,10 @@ const forms = {
     register: document.getElementById('register-form')
 };
 const messageBox = document.getElementById('auth-message');
+const modeButtons = document.querySelectorAll('.mode-btn');
+const adminCodeField = document.getElementById('admin-code-field');
+const modeNote = document.getElementById('mode-note');
+let selectedMode = 'User';
 
 function showMessage(text, type = 'success') {
     messageBox.textContent = text;
@@ -27,6 +31,33 @@ function setActiveTab(tabName) {
     Object.entries(forms).forEach(([key, form]) => {
         form.classList.toggle('active', key === tabName);
     });
+    updateAdminCodeVisibility();
+}
+
+function updateAdminCodeVisibility() {
+    const isAdminRegistration = selectedMode === 'Admin' && forms.register.classList.contains('active');
+    if (adminCodeField) adminCodeField.hidden = !isAdminRegistration;
+}
+
+function setAccessMode(mode) {
+    selectedMode = mode;
+    modeButtons.forEach((button) => {
+        const active = button.dataset.mode === mode;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+
+    const isAdmin = mode === 'Admin';
+    if (modeNote) {
+        modeNote.textContent = isAdmin
+            ? 'הכניסה והרשמת מנהלים מוגבלות לחשבונות שאושרו במערכת.'
+            : 'היכנסו כדי להתחיל לתכנן את החלל שלכם.';
+    }
+    updateAdminCodeVisibility();
+    if (forms.register) {
+        const submitLabel = forms.register.querySelector('.primary-btn span:first-child');
+        if (submitLabel) submitLabel.textContent = isAdmin ? 'הרשמת מנהל' : 'צור חשבון';
+    }
 }
 
 function validateLoginForm(data) {
@@ -70,7 +101,6 @@ function validateRegisterForm(data) {
 async function sendRequest(endpoint, payload) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
-        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -97,12 +127,20 @@ async function sendRequest(endpoint, payload) {
 function getResponseUser(data, fallbackUser) {
     const responseData = data.data || data;
     const user = data.user || responseData.user || data.account || {};
+    const { password, confirmPassword, adminCode, ...safeFallback } = fallbackUser;
     return {
-        ...fallbackUser,
+        ...safeFallback,
         ...user,
-        name: user.name || user.fullName || fallbackUser.name || user.email || fallbackUser.email,
-        role: String(user.role || fallbackUser.role || 'User')
+        name: user.name || user.fullName || safeFallback.name || user.email || safeFallback.email,
+        role: String(user.role || safeFallback.role || 'User')
     };
+}
+
+function storeAuth(data, user) {
+    const token = data.token || data.accessToken || data.jwt || data.data?.token;
+    if (!token) throw new Error('השרת לא החזיר אסימון התחברות תקין.');
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
 }
 
 async function handleLoginSubmit(event) {
@@ -126,6 +164,12 @@ async function handleLoginSubmit(event) {
         const user = getResponseUser(response, { name: email, email });
 
         const isAdmin = String(user.role).toLowerCase() === 'admin';
+        if ((selectedMode === 'Admin') !== isAdmin) {
+            throw new Error(selectedMode === 'Admin'
+                ? 'החשבון הזה אינו מורשה כמנהל.'
+                : 'זהו חשבון מנהל. בחרו בכניסת מנהלים.');
+        }
+        storeAuth(response, user);
         showMessage(isAdmin ? 'התחברת בהצלחה! מעביר אותך ללוח הניהול...' : 'התחברת בהצלחה! מעביר אותך לעמוד הבית...', 'success');
         setTimeout(() => {
             window.location.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../home/index.html';
@@ -145,7 +189,9 @@ async function handleRegisterSubmit(event) {
         phone: String(formData.get('phone') || '').trim(),
         email: String(formData.get('email') || '').trim(),
         password: String(formData.get('password') || '').trim(),
-        confirmPassword: String(formData.get('confirmPassword') || '').trim()
+        confirmPassword: String(formData.get('confirmPassword') || '').trim(),
+        accountMode: selectedMode,
+        adminCode: String(formData.get('adminCode') || '').trim()
     };
 
     try {
@@ -156,6 +202,12 @@ async function handleRegisterSubmit(event) {
         const user = getResponseUser(response, payload);
 
         const isAdmin = String(user.role).toLowerCase() === 'admin';
+        if ((selectedMode === 'Admin') !== isAdmin) {
+            throw new Error(selectedMode === 'Admin'
+                ? 'ההרשמה למנהלים זמינה רק לחשבונות מנהל שאושרו מראש.'
+                : 'כתובת זו שמורה לחשבון מנהל. בחרו במצב מנהל.');
+        }
+        storeAuth(response, user);
         showMessage(isAdmin ? 'החשבון נוצר בהצלחה! מעביר אותך ללוח הניהול...' : 'החשבון נוצר בהצלחה! מעביר אותך לעמוד הבית...', 'success');
         setTimeout(() => {
             window.location.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../home/index.html';
@@ -172,16 +224,28 @@ tabButtons.forEach((button) => {
     });
 });
 
+modeButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        clearMessage();
+        setAccessMode(button.dataset.mode);
+    });
+});
+
 forms.login.addEventListener('submit', handleLoginSubmit);
 forms.register.addEventListener('submit', handleRegisterSubmit);
 
-fetch(`${API_BASE_URL}/auth/me`, { credentials: 'include' })
+const existingToken = localStorage.getItem('token');
+if (existingToken) fetch(`${API_BASE_URL}/auth/me`, {
+    headers: { Authorization: `Bearer ${existingToken}` }
+})
     .then(async (response) => {
         if (!response.ok) return;
         const result = await response.json();
+        if (result.user) localStorage.setItem('user', JSON.stringify(result.user));
         const isAdmin = String(result.user?.role || 'User').toLowerCase() === 'admin';
         window.location.href = isAdmin ? '../admin-dashboard/admin-dashboard.html' : '../home/index.html';
     })
     .catch(() => {});
 
 setActiveTab('login');
+    setAccessMode('User');
