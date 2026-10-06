@@ -107,6 +107,18 @@ a { color: inherit; }
 .error-message { color: var(--danger); }
 
 .result-display-section { align-items: start; gap: 18px; }
+.inspiration-section, .related-inspiration { margin-block: 54px 30px; }
+.inspiration-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+.inspiration-heading h2 { margin: 0; color: var(--ink); font-size: clamp(1.5rem, 3vw, 2.2rem); }
+.inspiration-heading > p { max-width: 320px; margin: 0; color: var(--muted); line-height: 1.7; }
+.inspiration-gallery { display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 14px; }
+.inspiration-item { min-width: 0; margin: 0; overflow: hidden; background: #e9e7de; }
+.inspiration-item img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform .45s ease; }
+.inspiration-item:hover img { transform: scale(1.035); }
+.inspiration-item figcaption { display: flex; align-items: center; gap: 12px; padding: 13px 15px; color: var(--ink); font-weight: 650; }
+.inspiration-item figcaption span { color: var(--accent-dark); font: 600 .72rem 'DM Sans', sans-serif; }
+.related-gallery { display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 14px; }
+.related-gallery img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 .image-container, .products-panel { padding: 18px; }
 #result-image { border: 0; border-radius: 2px; }
 .products-panel { max-height: 620px; }
@@ -135,6 +147,11 @@ footer { padding: 20px; color: var(--muted); background: var(--paper-deep); bord
   .submit-btn { width: 100%; }
   .image-actions { flex-direction: column; }
   .product-item { align-items: flex-start; gap: 12px; }
+  .inspiration-heading { align-items: flex-start; flex-direction: column; }
+  .inspiration-gallery { grid-template-columns: 1fr 1fr; }
+  .inspiration-item-wide { grid-column: 1 / -1; }
+  .related-gallery { grid-template-columns: 1fr 1fr; }
+  .related-gallery img:first-child { grid-column: 1 / -1; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
