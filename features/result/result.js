@@ -71,6 +71,13 @@ function loadWizardRequestData() {
 
     const summary = document.getElementById('result-summary');
     if (summary) summary.textContent = designResult?.summary || '';
+
+    const budget = Number(designResult?.formDetails?.budget || 0);
+    const budgetElement = document.getElementById('result-budget');
+    if (budgetElement && budget > 0) {
+        budgetElement.textContent = `התקציב שבחרת: ${budget.toLocaleString('he-IL')} ₪`;
+        budgetElement.hidden = false;
+    }
 }
 
 /**
@@ -134,7 +141,10 @@ function updateTotalPrice() {
     const totalPriceSpan = document.getElementById('total-price');
     if (!totalPriceSpan) return;
 
-    const total = designProducts.reduce((sum, product) => sum + product.price, 0);
+    const total = designProducts.reduce((sum, product) => {
+        const price = Number(product.price);
+        return sum + (Number.isFinite(price) && price > 0 ? price : 0);
+    }, 0);
     totalPriceSpan.textContent = total.toLocaleString();
 }
 

@@ -86,10 +86,12 @@ h2 { font-size: 1.35rem; }
 h3 { font-size: 1rem; }
 .charts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .chart-card { min-width: 0; padding: 18px; }
-.bars { min-height: 185px; padding: 24px 0 3px; display: flex; align-items: end; gap: 8px; overflow-x: auto; }
-.bar-group { min-width: 32px; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; }
-.bar { width: min(100%, 34px); min-height: 5px; border-radius: 2px 2px 0 0; background: linear-gradient(180deg, #8a9a70, #536b51); transition: height .35s ease; }
+.bars { height: 230px; padding: 22px 0 24px; display: flex; align-items: end; gap: 8px; overflow-x: auto; }
+.bar-group { min-width: 30px; height: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 7px; }
+.bar { width: min(100%, 34px); min-height: 0; flex: 0 0 auto; position: relative; border-radius: 2px 2px 0 0; background: linear-gradient(180deg, #adba91, #536b51); transition: height .35s ease; }
+.bar::before { content: attr(title); position: absolute; inset-inline: 0; top: -19px; color: var(--admin-ink); font-size: .68rem; font-weight: 700; text-align: center; }
 .bar-label { color: var(--admin-muted); font-size: .69rem; white-space: nowrap; }
+.chart-empty { grid-column: 1 / -1; grid-row: 1 / -1; align-self: center; justify-self: center; color: var(--admin-muted); font-size: .9rem; }
 .table-wrap { overflow-x: auto; }
 .table { width: 100%; border-collapse: collapse; min-width: 640px; }
 th, td { padding: 13px 11px; border-bottom: 1px solid var(--admin-line); text-align: right; }

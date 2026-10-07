@@ -42,14 +42,13 @@ function buildMonthlyStats(items) {
   const counts = {};
 
   items.forEach((item) => {
-    if (!item.createdAt) return;
-    const date = new Date(item.createdAt);
+    const date = new Date(item.createdAt || item.date || '');
     if (Number.isNaN(date.getTime())) return;
-    const month = monthNames[date.getMonth()];
+    const month = date.getMonth();
     counts[month] = (counts[month] || 0) + 1;
   });
 
-  return monthNames.map((month) => ({ label: month, value: counts[month] || 0 }));
+  return monthNames.map((label, month) => ({ label, value: counts[month] || 0 }));
 }
 
 function renderStatCards() {
@@ -62,9 +61,18 @@ function renderStatCards() {
 function renderBars(containerId, data) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  
+
   const max = Math.max(...data.map((item) => item.value), 1);
   container.innerHTML = '';
+  container.style.setProperty('--chart-max', String(max));
+
+  if (!data.some((item) => item.value > 0)) {
+    const empty = document.createElement('p');
+    empty.className = 'chart-empty';
+    empty.textContent = 'אין פעילות ב-12 החודשים האחרונים';
+    container.appendChild(empty);
+    return;
+  }
 
   data.forEach((item) => {
     const group = document.createElement('div');
@@ -72,7 +80,8 @@ function renderBars(containerId, data) {
 
     const bar = document.createElement('div');
     bar.className = 'bar';
-    bar.style.height = `${(item.value / max) * 100}%`;
+    bar.style.height = `${item.value > 0 ? Math.max(8, (item.value / max) * 100) : 0}%`;
+    bar.title = `${item.label}: ${item.value}`;
 
     const label = document.createElement('div');
     label.className = 'bar-label';
@@ -238,12 +247,12 @@ async function loadDashboardData() {
     apiRequest('/admin/renders')
   ]);
 
-  users = usersResponse.map((user) => ({
+  users = (Array.isArray(usersResponse) ? usersResponse : usersResponse.users || []).map((user) => ({
     ...user,
     id: String(user._id || user.id),
     role: String(user.role || 'User').toLowerCase() === 'admin' ? 'Admin' : 'User'
   }));
-  designs = rendersResponse.map((render) => ({
+  designs = (Array.isArray(rendersResponse) ? rendersResponse : rendersResponse.renders || []).map((render) => ({
     ...render,
     id: String(render.id || render._id),
     userId: String(render.userId || ''),
