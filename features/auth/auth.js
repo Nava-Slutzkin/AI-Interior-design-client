@@ -8,6 +8,8 @@ const forms = {
 const messageBox = document.getElementById('auth-message');
 const modeButtons = document.querySelectorAll('.mode-btn');
 const modeNote = document.getElementById('mode-note');
+const tabSwitch = document.getElementById('tab-switch');
+const registerTab = document.querySelector('[data-tab="register"]');
 let selectedMode = 'User';
 
 function showMessage(text, type = 'success') {
@@ -21,35 +23,39 @@ function clearMessage() {
 }
 
 function setActiveTab(tabName) {
+    const isAdmin = selectedMode === 'Admin';
+    const requestedTab = isAdmin && tabName === 'register' ? 'login' : tabName;
+
     tabButtons.forEach((button) => {
-        const isActive = button.dataset.tab === tabName;
+        const isActive = button.dataset.tab === requestedTab;
         button.classList.toggle('active', isActive);
         button.setAttribute('aria-selected', String(isActive));
     });
 
     Object.entries(forms).forEach(([key, form]) => {
-        form.classList.toggle('active', key === tabName);
+        form.classList.toggle('active', key === requestedTab);
     });
 }
 
 function setAccessMode(mode) {
     selectedMode = mode;
+    const isAdmin = mode === 'Admin';
+
     modeButtons.forEach((button) => {
         const active = button.dataset.mode === mode;
         button.classList.toggle('active', active);
         button.setAttribute('aria-pressed', String(active));
     });
 
-    const isAdmin = mode === 'Admin';
+    if (tabSwitch) tabSwitch.hidden = isAdmin;
+    if (registerTab) registerTab.hidden = isAdmin;
     if (modeNote) {
         modeNote.textContent = isAdmin
-            ? 'התחברות והרשמה כמנהל זמינות רק לשתי כתובות המייל שאושרו.'
+            ? 'התחברות מנהלים בלבד. הרשמה למנהלים אינה זמינה.'
             : 'היכנסו כדי להתחיל לתכנן את החלל שלכם.';
     }
-    if (forms.register) {
-        const submitLabel = forms.register.querySelector('.primary-btn span:first-child');
-        if (submitLabel) submitLabel.textContent = isAdmin ? 'הרשמת מנהל' : 'צור חשבון';
-    }
+
+    setActiveTab('login');
 }
 
 function validateLoginForm(data) {
@@ -183,6 +189,10 @@ async function handleRegisterSubmit(event) {
     try {
         validateRegisterForm(payload);
         showMessage('יוצר חשבון...', 'success');
+
+        if (selectedMode === 'Admin') {
+            throw new Error('הרשמה למנהלים אינה זמינה.');
+        }
 
         const response = await sendRequest('/auth/register', payload);
         const user = getResponseUser(response, payload);

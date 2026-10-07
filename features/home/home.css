@@ -86,7 +86,7 @@ body {
     overflow: hidden;
     text-align: right;
     color: #fff;
-    background: #40584b url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2000&q=88') center 55% / cover no-repeat;
+    background: #40584b url('https://images.unsplash.com/photo-1615874694520-474822394e73?auto=format&fit=crop&w=2000&q=88') center 55% / cover no-repeat;
 }
 
 .hero::before {
@@ -270,6 +270,75 @@ body {
     opacity: 0.72;
 }
 
+.inspiration-section {
+    margin-top: 4rem;
+}
+
+.inspiration-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 1.35rem;
+}
+
+.inspiration-heading h2 {
+    color: #f8fafc;
+    font-size: 1.55rem;
+}
+
+.inspiration-heading > p {
+    max-width: 380px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.inspiration-gallery {
+    display: grid;
+    grid-template-columns: 1.45fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.inspiration-item {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #1e293b;
+}
+
+.inspiration-item img {
+    width: 100%;
+    height: clamp(280px, 32vw, 410px);
+    display: block;
+    object-fit: cover;
+    transition: transform .35s ease;
+}
+
+.inspiration-item:hover img {
+    transform: scale(1.035);
+}
+
+.inspiration-item figcaption {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 0.85rem 1rem;
+    background: linear-gradient(transparent, rgba(7, 13, 26, .9));
+    color: #fff;
+    font-size: .85rem;
+    font-weight: 650;
+}
+
+.inspiration-item figcaption span {
+    color: #7dd3fc;
+}
+
 .generation-overlay {
     position: fixed;
     inset: 0;
@@ -406,6 +475,20 @@ body {
     .form-actions {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .inspiration-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .inspiration-gallery {
+        grid-template-columns: 1fr;
+    }
+
+    .inspiration-item img {
+        height: clamp(260px, 72vw, 380px);
     }
 }
 
