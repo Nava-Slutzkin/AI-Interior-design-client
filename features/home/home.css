@@ -176,6 +176,7 @@ body {
 }
 
 .form-field > span,
+.media-upload > label,
 .room-fields h3 {
     color: #dbe5f1;
     font-size: 0.95rem;
@@ -216,6 +217,139 @@ body {
 
 .form-field-wide {
     grid-column: 1 / -1;
+}
+
+.media-attachments {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.4rem;
+}
+
+.media-upload {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.55rem;
+    color: #dbe5f1;
+    font-size: 0.95rem;
+    font-weight: 650;
+}
+
+.media-upload input {
+    width: 100%;
+    min-height: 46px;
+    border: 1px dashed #60748d;
+    border-radius: 5px;
+    padding: 0.55rem;
+    background: #0f172a;
+    color: #cbd5e1;
+    font: inherit;
+    font-size: 0.85rem;
+}
+
+.capture-btn {
+    align-self: flex-start;
+    min-height: 38px;
+    border: 1px solid #60748d;
+    border-radius: 4px;
+    padding: 0.45rem 0.75rem;
+    background: #1e293b;
+    color: #f8fafc;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.capture-btn:hover {
+    border-color: #38bdf8;
+}
+
+.recording-status {
+    min-height: 1.2em;
+    color: #f2b39e;
+    font-size: 0.85rem;
+}
+
+.camera-panel {
+    display: grid;
+    grid-column: 1 / -1;
+    gap: 0.75rem;
+    justify-items: start;
+}
+
+.camera-panel[hidden] {
+    display: none;
+}
+
+.camera-panel video {
+    width: min(100%, 560px);
+    max-height: 420px;
+    aspect-ratio: 4 / 3;
+    border-radius: 4px;
+    background: #050a12;
+    object-fit: cover;
+}
+
+.camera-panel > div {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.media-upload input:focus-visible,
+.attachment-preview button:focus-visible,
+.capture-btn:focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 2px;
+}
+
+.attachment-preview {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem;
+    border: 1px solid #46566d;
+    border-radius: 5px;
+    background: #0f172a;
+}
+
+.attachment-preview[hidden] {
+    display: none;
+}
+
+.attachment-preview img {
+    width: 64px;
+    height: 52px;
+    flex: 0 0 auto;
+    border-radius: 3px;
+    object-fit: cover;
+}
+
+.attachment-preview audio {
+    width: min(100%, 270px);
+    min-width: 0;
+}
+
+.attachment-name {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    color: #cbd5e1;
+    font-size: 0.85rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.attachment-preview button {
+    flex: 0 0 auto;
+    border: 0;
+    padding: 0.35rem;
+    background: transparent;
+    color: #f2b39e;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
 }
 
 .conditional-fields {
@@ -458,6 +592,10 @@ body {
 
     .design-form {
         padding: 0 1rem;
+    }
+
+    .media-attachments {
+        grid-template-columns: 1fr;
     }
 
     .form-grid {

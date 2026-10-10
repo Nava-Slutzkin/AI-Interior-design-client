@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../פרויקט גמר"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "פרויקט גמר לקוח"
+	}
+}

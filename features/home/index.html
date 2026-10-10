@@ -77,6 +77,36 @@
                     <textarea name="description" rows="4" placeholder="צבעים אהובים, רהיטים שיישארו, אווירה רצויה וכל פרט שיעזור לדייק..."></textarea>
                 </label>
             </div>
+            <div class="media-attachments" aria-label="קבצים לעיצוב">
+                <div class="media-upload">
+                    <label for="image-attachment">תמונת השראה <span class="optional">(לא חובה)</span></label>
+                    <input id="image-attachment" name="imageAttachment" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <button class="capture-btn" type="button" id="capture-image">צילום תמונה</button>
+                </div>
+                <div class="media-upload">
+                    <label for="audio-attachment">הקלטה או שמע <span class="optional">(לא חובה)</span></label>
+                    <input id="audio-attachment" name="audioAttachment" type="file" accept="audio/wav,audio/x-wav,audio/mpeg,audio/mp3,audio/mp4,audio/ogg,audio/flac,audio/aac,audio/webm">
+                    <button class="capture-btn" type="button" id="record-audio">התחלת הקלטה</button>
+                    <span id="recording-status" class="recording-status" aria-live="polite"></span>
+                </div>
+                <div id="image-preview" class="attachment-preview" hidden>
+                    <img alt="תצוגה מקדימה של תמונת ההשראה">
+                    <span class="attachment-name"></span>
+                    <button type="button" data-remove-attachment="image" aria-label="הסרת התמונה">הסרה</button>
+                </div>
+                <div id="audio-preview" class="attachment-preview" hidden>
+                    <audio controls></audio>
+                    <span class="attachment-name"></span>
+                    <button type="button" data-remove-attachment="audio" aria-label="הסרת קובץ השמע">הסרה</button>
+                </div>
+                <div id="camera-panel" class="camera-panel" hidden>
+                    <video id="camera-preview" autoplay playsinline></video>
+                    <div>
+                        <button class="capture-btn" type="button" id="take-photo">צילום</button>
+                        <button class="capture-btn" type="button" id="close-camera">סגירה</button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <div class="form-actions">
