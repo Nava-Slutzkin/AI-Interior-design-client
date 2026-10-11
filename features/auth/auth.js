@@ -1,4 +1,4 @@
-const API_BASE_URL = `http://${window.location.hostname}:1000/api`;
+const API_BASE_URL = `http://server-thtt.onrender.com/api`;
 
 const tabButtons = document.querySelectorAll('.tab');
 const forms = {
