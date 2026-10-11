@@ -28,13 +28,14 @@
     <section class="result-header">
         <h1 id="result-title">תוצאת העיצוב שלך</h1>
         <p>תוכנית עיצוב ורשימת רהיטים שנוצרו על בסיס הפרטים שמסרת.</p>
-        <p id="result-summary"></p>
+        <p id="result-summary" class="result-summary"></p>
     </section>
 
     <section class="result-display-section">
         <div class="image-container">
-            <img id="result-image" alt="הדמיית עיצוב שנוצרה בבינה מלאכותית">
-            <p id="image-unavailable" hidden>יצירת תמונות אינה זמינה כרגע במודל החינמי. רשימת העיצוב נשמרה בחשבון.</p>
+            <div id="result-gallery" class="result-gallery" aria-live="polite"></div>
+            <p id="image-unavailable" hidden>עדיין אין תמונות במאגר עבור סוג החדר שנבחר.</p>
+            <button type="button" id="show-more-images-btn" class="btn-secondary" hidden>עוד תמונות</button>
             <p id="result-budget" class="result-budget" hidden></p>
             <div class="image-actions">
                 <button type="button" id="print-btn" class="btn-secondary">הדפס הדמיה 🖨️</button>
@@ -77,6 +78,11 @@
     </div>
 
 </main>
+
+<dialog id="image-preview-dialog" class="image-preview-dialog" aria-label="תצוגה מוגדלת של תמונה">
+    <button type="button" id="close-image-preview" class="image-preview-close" aria-label="סגירה">&times;</button>
+    <img id="image-preview" alt="">
+</dialog>
 
 <footer>
     <p>© 2026 AI Home Designer. כל הזכויות שמורות.</p>
