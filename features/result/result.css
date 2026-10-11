@@ -86,6 +86,14 @@ color: #94a3b8;
 font-size: 1.1rem;
 }
 
+.result-header .result-summary {
+max-width: 850px;
+margin: 1rem auto 0;
+color: #203a32;
+text-align: right;
+line-height: 1.8;
+}
+
 .result-display-section {
 display: grid;
 grid-template-columns: 1fr 1fr;
