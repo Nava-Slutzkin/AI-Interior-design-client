@@ -15,6 +15,8 @@ async function requireAuth() {
 // API for stored renders
 let designResult = null;
 let designProducts = [];
+let displayedImages = [];
+let hasMoreImages = false;
 
 async function loadDesignResult() {
     const renderId = new URLSearchParams(window.location.search).get('id');
@@ -25,6 +27,8 @@ async function loadDesignResult() {
     if (!response.ok) throw new Error(result.message || 'טעינת ההדמיה נכשלה.');
 
     designResult = result;
+    displayedImages = Array.isArray(result.images) ? result.images : [];
+    hasMoreImages = Boolean(result.hasMoreImages);
     designProducts = Array.isArray(result.items)
         ? result.items.map((item, index) => ({ ...item, id: item._id || index + 1, price: Number(item.price || 0) }))
         : [];
@@ -53,21 +57,7 @@ function loadWizardRequestData() {
         titleElement.textContent = `עיצוב עבור ${roomType}${style ? ` בסגנון ${style}` : ''}`;
     }
 
-    const resultImage = document.getElementById('result-image');
-    const imageUnavailable = document.getElementById('image-unavailable');
-    if (designResult?.resultImage && designResult.imageGenerated !== false) {
-        resultImage.src = designResult.resultImage;
-        resultImage.hidden = false;
-        imageUnavailable.hidden = true;
-        resultImage.onerror = () => {
-            resultImage.hidden = true;
-            imageUnavailable.hidden = false;
-        };
-    } else {
-        resultImage.hidden = true;
-        imageUnavailable.hidden = false;
-        imageUnavailable.textContent = 'הצעת העיצוב נוצרה עם AI, אך יצירת תמונה אינה זמינה כרגע. ניתן לנסות שוב מאוחר יותר.';
-    }
+    renderRoomImages();
 
     const summary = document.getElementById('result-summary');
     if (summary) summary.textContent = designResult?.summary || '';
@@ -77,6 +67,84 @@ function loadWizardRequestData() {
     if (budgetElement && budget > 0) {
         budgetElement.textContent = `התקציב שבחרת: ${budget.toLocaleString('he-IL')} ₪`;
         budgetElement.hidden = false;
+    }
+}
+
+function renderRoomImages() {
+    const gallery = document.getElementById('result-gallery');
+    const imageUnavailable = document.getElementById('image-unavailable');
+    const moreButton = document.getElementById('show-more-images-btn');
+    if (!gallery || !imageUnavailable || !moreButton) return;
+
+    gallery.replaceChildren();
+    displayedImages.forEach((image, index) => {
+        const previewButton = document.createElement('button');
+        previewButton.type = 'button';
+        previewButton.className = 'image-preview-trigger';
+        previewButton.setAttribute('aria-label', `הגדלת תמונה ${index + 1}`);
+
+        const img = document.createElement('img');
+        img.src = new URL(image.url, window.authApi.baseUrl).href;
+        img.alt = `תמונה ${index + 1} לעיצוב ${designResult?.formDetails?.roomType || 'החדר'}`;
+        img.loading = 'lazy';
+        img.onerror = () => previewButton.remove();
+        previewButton.appendChild(img);
+        gallery.appendChild(previewButton);
+    });
+
+    gallery.hidden = displayedImages.length === 0;
+    imageUnavailable.hidden = displayedImages.length > 0;
+    imageUnavailable.textContent = 'עדיין אין תמונות במאגר עבור סוג החדר שנבחר.';
+    moreButton.hidden = !hasMoreImages || displayedImages.length === 0;
+}
+
+function initImagePreview() {
+    const gallery = document.getElementById('result-gallery');
+    const dialog = document.getElementById('image-preview-dialog');
+    const previewImage = document.getElementById('image-preview');
+    const closeButton = document.getElementById('close-image-preview');
+    if (!gallery || !dialog || !previewImage || !closeButton) return;
+
+    gallery.addEventListener('click', (event) => {
+        const trigger = event.target.closest('.image-preview-trigger');
+        if (!trigger) return;
+
+        const thumbnail = trigger.querySelector('img');
+        previewImage.src = thumbnail.src;
+        previewImage.alt = thumbnail.alt;
+        dialog.showModal();
+    });
+
+    closeButton.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+    });
+}
+
+async function loadMoreRoomImages() {
+    const button = document.getElementById('show-more-images-btn');
+    if (!button || button.disabled || !hasMoreImages) return;
+
+    button.disabled = true;
+    button.textContent = 'טוען תמונות...';
+    try {
+        const roomType = designResult?.formDetails?.roomType || '';
+        const response = await window.authApi.request(`/renders/images?roomType=${encodeURIComponent(roomType)}`, {
+            method: 'POST',
+            body: JSON.stringify({ exclude: displayedImages.map((image) => image.name).filter(Boolean) })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.message || 'טעינת התמונות נכשלה.');
+
+        displayedImages = [...displayedImages, ...(Array.isArray(result.images) ? result.images : [])];
+        hasMoreImages = Boolean(result.hasMore);
+        renderRoomImages();
+    } catch (error) {
+        alert(error.message || 'טעינת התמונות נכשלה.');
+    } finally {
+        button.disabled = false;
+        button.textContent = 'עוד תמונות';
+        button.hidden = !hasMoreImages || displayedImages.length === 0;
     }
 }
 
@@ -243,6 +311,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     loadWizardRequestData();
+    initImagePreview();
+    document.getElementById('show-more-images-btn')?.addEventListener('click', loadMoreRoomImages);
     renderProducts();
     initAddCustomProduct();
     initPrintAndSave();
