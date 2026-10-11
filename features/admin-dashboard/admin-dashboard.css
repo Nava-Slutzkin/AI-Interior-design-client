@@ -120,3 +120,13 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   .panel { padding: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; } }
+
+@media (max-width: 420px) {
+  .dashboard-shell { width: calc(100% - 18px); }
+  .topbar { padding-inline: 12px; }
+  .nav-links { display: grid; grid-template-columns: 1fr 1fr; }
+  .user-name { grid-column: 1 / -1; overflow-wrap: anywhere; }
+  .table-wrap { margin-inline: -4px; }
+  .panel { min-width: 0; padding: 13px; }
+  .admin-welcome { min-height: 210px; padding: 18px; }
+}

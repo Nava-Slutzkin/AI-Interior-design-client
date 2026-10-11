@@ -85,8 +85,12 @@
                 </div>
                 <div class="media-upload">
                     <label for="audio-attachment">הקלטה או שמע <span class="optional">(לא חובה)</span></label>
+                    <div class="audio-unavailable" role="status">
+                        <span class="audio-unavailable-mark" aria-hidden="true">♪</span>
+                        <span><strong>אפשר להקליט ולצרף שמע</strong><small>עקב מחסור זמני בקרדיט AI, ייתכן שעיבוד ההקלטה לא יושלם כרגע.</small></span>
+                    </div>
                     <input id="audio-attachment" name="audioAttachment" type="file" accept="audio/wav,audio/x-wav,audio/mpeg,audio/mp3,audio/mp4,audio/ogg,audio/flac,audio/aac,audio/webm">
-                    <button class="capture-btn" type="button" id="record-audio">התחלת הקלטה</button>
+                    <button class="capture-btn audio-action" type="button" id="record-audio">התחלת הקלטה</button>
                     <span id="recording-status" class="recording-status" aria-live="polite"></span>
                 </div>
                 <div id="image-preview" class="attachment-preview" hidden>
