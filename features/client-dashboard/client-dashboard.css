@@ -209,6 +209,8 @@ input:focus, select:focus, textarea:focus {
 .design-list {
   display: grid;
   gap: 14px;
+  width: min(100%, 1050px);
+  margin-inline: auto;
 }
 
 .design-item {
@@ -225,6 +227,17 @@ input:focus, select:focus, textarea:focus {
 .design-item h3 {
   margin: 0 0 6px;
   font-size: 1.05rem;
+}
+
+.design-item > div:first-child {
+  min-width: 0;
+}
+
+.design-item > div:first-child .meta {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .meta {
