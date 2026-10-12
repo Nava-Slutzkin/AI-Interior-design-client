@@ -1,5 +1,5 @@
 window.authApi = {
-    baseUrl: `https://server-thtt.onrender.com/api`,
+    baseUrl: `http://${window.location.hostname}:1000/api`,
 
     async request(path, options = {}) {
         const headers = new Headers(options.headers || {});
