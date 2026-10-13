@@ -84,7 +84,7 @@ function renderRoomImages() {
         previewButton.setAttribute('aria-label', `הגדלת תמונה ${index + 1}`);
 
         const img = document.createElement('img');
-        img.src = new URL(image.url, window.authApi.baseUrl).href;
+        img.src = new URL(image.url, window.API_BASE_URL || window.location.origin).href;
         img.alt = `תמונה ${index + 1} לעיצוב ${designResult?.formDetails?.roomType || 'החדר'}`;
         img.loading = 'lazy';
         img.onerror = () => previewButton.remove();

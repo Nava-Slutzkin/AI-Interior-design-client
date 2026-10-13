@@ -1,5 +1,13 @@
 let designs = [];
 
+function getEstimatedBudget(design) {
+  const savedEstimate = Number(design.estimatedBudget || 0);
+  if (savedEstimate > 0) return savedEstimate;
+  return Array.isArray(design.items)
+    ? design.items.reduce((total, item) => total + Number(item.price || 0), 0)
+    : 0;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const user = await window.authApi.getCurrentUser().catch(() => null);
 
@@ -30,7 +38,7 @@ function calculateFavoriteStyle(designs) {
 
 function renderSummary() {
   const total = designs.length;
-  const avg = total ? Math.round(designs.reduce((sum, design) => sum + Number(design.formDetails?.budget || 0), 0) / total) : 0;
+  const avg = total ? Math.round(designs.reduce((sum, design) => sum + getEstimatedBudget(design), 0) / total) : 0;
 
   document.getElementById('design-count').textContent = String(total);
   document.getElementById('avg-budget').textContent = `${avg.toLocaleString('he-IL')} ₪`;
@@ -48,7 +56,7 @@ function renderDesignList() {
   list.innerHTML = designs.map((design) => {
     const roomType = design.formDetails?.roomType || 'חלל';
     const style = design.formDetails?.style || '-';
-    const budget = Number(design.formDetails?.budget || 0);
+    const budget = getEstimatedBudget(design);
     const name = `עיצוב ${roomType}`;
     return `
     <article class="design-item">

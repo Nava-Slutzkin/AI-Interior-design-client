@@ -4,15 +4,13 @@ if (!window.API_BASE_URL) {
         ? 'http://localhost:1000/api'
         : 'https://server-whu3.onrender.com/api';
 }
-const API_BASE_URL = window.API_BASE_URL;
-
 window.authApi = {
     async request(path, options = {}) {
         const headers = new Headers(options.headers || {});
         const token = window.localStorage.getItem('token');
         if (token) headers.set('Authorization', `Bearer ${token}`);
         if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-        return fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+        return fetch(`${window.API_BASE_URL}${path}`, { ...options, headers });
     },
 
     async getCurrentUser() {

@@ -256,7 +256,7 @@ async function loadDashboardData() {
     ...render,
     id: String(render.id || render._id),
     userId: String(render.userId || ''),
-    budget: Number(render.formDetails?.budget || render.budget || 0),
+    budget: Number(render.estimatedBudget || render.items?.reduce((sum, item) => sum + Number(item.price || 0), 0) || 0),
     style: render.formDetails?.style || render.style || '-'
   }));
 
