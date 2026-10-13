@@ -1,4 +1,6 @@
-const API_BASE_URL = `http://${window.location.hostname}:1000/api`;
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? `http://${window.location.hostname}:1000/api`
+    : 'https://server-whu3.onrender.com/api';
 
 const tabButtons = document.querySelectorAll('.tab');
 const forms = {
