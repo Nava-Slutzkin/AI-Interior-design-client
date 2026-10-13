@@ -1,12 +1,14 @@
-window.authApi = {
-    baseUrl: `http://${window.location.hostname}:1000/api`,
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? `http://${window.location.hostname}:1000/api`
+    : 'https://server-whu3.onrender.com/api';
 
+window.authApi = {
     async request(path, options = {}) {
         const headers = new Headers(options.headers || {});
         const token = window.localStorage.getItem('token');
         if (token) headers.set('Authorization', `Bearer ${token}`);
         if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-        return fetch(`${this.baseUrl}${path}`, { ...options, headers });
+        return fetch(`${API_BASE_URL}${path}`, { ...options, headers });
     },
 
     async getCurrentUser() {
