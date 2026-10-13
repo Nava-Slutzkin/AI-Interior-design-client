@@ -1,6 +1,10 @@
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? `http://${window.location.hostname}:1000/api`
-    : 'https://server-whu3.onrender.com/api';
+// הגדרה גלובלית בטוחה שלא תזרוק שגיאה אם כבר הוגדרה בקובץ אחר
+if (!window.API_BASE_URL) {
+    window.API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:1000/api'
+        : 'https://server-whu3.onrender.com/api';
+}
+const API_BASE_URL = window.API_BASE_URL;
 
 window.authApi = {
     async request(path, options = {}) {
