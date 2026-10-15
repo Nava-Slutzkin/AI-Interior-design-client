@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  document.getElementById('current-user-name').textContent = user.name || user.email || '';
 });
 
 function calculateFavoriteStyle(designs) {
@@ -103,11 +102,7 @@ async function loadDesigns() {
   const allDesigns = [];
 
   for (let page = 1; ; page += 1) {
-    const response = await window.authApi.request(`/renders?page=${page}&limit=${pageSize}`);
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(result.message || 'טעינת ההדמיות נכשלה.');
-    }
+    const result = await window.authApi.requestJson(`/renders?page=${page}&limit=${pageSize}`, {}, 'טעינת ההדמיות נכשלה.');
 
     const pageDesigns = Array.isArray(result) ? result : [];
     allDesigns.push(...pageDesigns);
@@ -123,23 +118,16 @@ async function deleteDesign(designId) {
   if (!window.confirm('למחוק את ההדמיה מהחשבון?')) return;
 
   try {
-    const response = await window.authApi.request(`/renders/${encodeURIComponent(designId)}`, { method: 'DELETE' });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || 'מחיקת ההדמיה נכשלה.');
+    await window.authApi.requestJson(`/renders/${encodeURIComponent(designId)}`, { method: 'DELETE' }, 'מחיקת ההדמיה נכשלה.');
     await loadDesigns();
   } catch (error) {
     alert(error.message || 'מחיקת ההדמיה נכשלה.');
   }
 }
 
-async function logout() {
-  await window.authApi.logout();
-  window.location.href = '../auth/login.html';
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   loadDesigns().catch((error) => {
     document.getElementById('design-list').innerHTML = `<div class="empty-state">${escapeHtml(error.message || 'טעינת ההדמיות נכשלה.')}</div>`;
   });
-  document.getElementById('logout-btn').addEventListener('click', logout);
+  document.getElementById('logout-btn').addEventListener('click', () => window.authApi.logoutAndRedirect('../auth/login.html'));
 });

@@ -3,10 +3,7 @@ let designs = [];
 let currentUserId = '';
 
 async function apiRequest(path, options = {}) {
-  const response = await window.authApi.request(path, options);
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result.message || 'הבקשה לשרת נכשלה.');
-  return result;
+  return window.authApi.requestJson(path, options, 'הבקשה לשרת נכשלה.');
 }
 
 function showMessage(message, isError = false) {
@@ -315,11 +312,6 @@ async function deleteDesign(designId) {
   }
 }
 
-async function logout() {
-  await window.authApi.logout();
-  window.location.href = '../auth/login.html';
-}
-
 // טעינה ואבטחת גישה ללוח המנהל
 document.addEventListener('DOMContentLoaded', async () => {
   const user = await window.authApi.getCurrentUser().catch(() => null);
@@ -334,8 +326,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   currentUserId = String(user._id || user.id || '');
-  const nameElement = document.getElementById('current-user-name');
-  if (nameElement) nameElement.textContent = user.name || user.email || '';
 
   loadDashboardData().catch((error) => {
     showMessage(`לא ניתן לטעון נתונים מהמסד: ${error.message}`, true);
@@ -343,6 +333,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', logout);
+    logoutBtn.addEventListener('click', () => window.authApi.logoutAndRedirect('../auth/login.html'));
   }
 });

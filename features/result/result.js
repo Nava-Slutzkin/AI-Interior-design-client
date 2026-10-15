@@ -18,32 +18,30 @@ let designProducts = [];
 let displayedImages = [];
 let hasMoreImages = false;
 
+function normalizeDesignProducts(items) {
+    return Array.isArray(items)
+        ? items.map((item, index) => ({ ...item, id: item._id || index + 1, price: Number(item.price || 0) }))
+        : [];
+}
+
 async function loadDesignResult() {
     const renderId = new URLSearchParams(window.location.search).get('id');
     if (!renderId) throw new Error('לא נמצא מזהה של ההדמיה.');
 
-    const response = await window.authApi.request(`/renders/${encodeURIComponent(renderId)}`);
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || 'טעינת ההדמיה נכשלה.');
+    const result = await window.authApi.requestJson(`/renders/${encodeURIComponent(renderId)}`, {}, 'טעינת ההדמיה נכשלה.');
 
     designResult = result;
     displayedImages = Array.isArray(result.images) ? result.images : [];
     hasMoreImages = Boolean(result.hasMoreImages);
-    designProducts = Array.isArray(result.items)
-        ? result.items.map((item, index) => ({ ...item, id: item._id || index + 1, price: Number(item.price || 0) }))
-        : [];
+    designProducts = normalizeDesignProducts(result.items);
 }
 
 async function saveDesignProducts(items = designProducts) {
-    const response = await window.authApi.request(`/renders/${encodeURIComponent(designResult.id)}`, {
+    const result = await window.authApi.requestJson(`/renders/${encodeURIComponent(designResult.id)}`, {
         method: 'PUT',
         body: JSON.stringify({ items })
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || 'שמירת רשימת הפריטים נכשלה.');
-    designProducts = Array.isArray(result.items)
-        ? result.items.map((item, index) => ({ ...item, id: item._id || index + 1, price: Number(item.price || 0) }))
-        : items;
+    }, 'שמירת רשימת הפריטים נכשלה.');
+    designProducts = Array.isArray(result.items) ? normalizeDesignProducts(result.items) : items;
 }
 
 /**
@@ -129,12 +127,10 @@ async function loadMoreRoomImages() {
     button.textContent = 'טוען תמונות...';
     try {
         const roomType = designResult?.formDetails?.roomType || '';
-        const response = await window.authApi.request(`/renders/images?roomType=${encodeURIComponent(roomType)}`, {
+        const result = await window.authApi.requestJson(`/renders/images?roomType=${encodeURIComponent(roomType)}`, {
             method: 'POST',
             body: JSON.stringify({ exclude: displayedImages.map((image) => image.name).filter(Boolean) })
-        });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.message || 'טעינת התמונות נכשלה.');
+        }, 'טעינת התמונות נכשלה.');
 
         displayedImages = [...displayedImages, ...(Array.isArray(result.images) ? result.images : [])];
         hasMoreImages = Boolean(result.hasMore);

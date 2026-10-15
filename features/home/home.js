@@ -315,7 +315,7 @@ function setupDesignRequestForm() {
 
         try {
             const attachments = await Promise.all(selectedFiles.map(readAttachment));
-            const response = await window.authApi.request('/renders', {
+            const result = await window.authApi.requestJson('/renders', {
                 method: 'POST',
                 body: JSON.stringify({
                     text,
@@ -328,9 +328,7 @@ function setupDesignRequestForm() {
                         dimensions: ''
                     }
                 })
-            });
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(result.message || 'יצירת ההדמיה נכשלה.');
+            }, 'יצירת ההדמיה נכשלה.');
 
             window.location.href = `../result/result.html?id=${encodeURIComponent(result.id)}`;
         } catch (error) {

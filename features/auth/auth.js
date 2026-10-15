@@ -1,7 +1,3 @@
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? `http://${window.location.hostname}:1000/api`
-    : 'https://server-whu3.onrender.com/api';
-
 const tabButtons = document.querySelectorAll('.tab');
 const forms = {
     login: document.getElementById('login-form'),
@@ -99,29 +95,10 @@ function validateRegisterForm(data) {
 }
 
 async function sendRequest(endpoint, payload) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    return window.authApi.requestJson(endpoint, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
         body: JSON.stringify(payload)
-    });
-
-    let result = null;
-    const contentType = response.headers.get('content-type') || '';
-
-    if (contentType.includes('application/json')) {
-        result = await response.json();
-    } else {
-        const text = await response.text();
-        result = text ? { message: text } : {};
-    }
-
-    if (!response.ok) {
-        throw new Error(result?.message || 'הבקשה נכשלה');
-    }
-
-    return result;
+    }, 'הבקשה נכשלה');
 }
 
 function getResponseUser(data, fallbackUser) {

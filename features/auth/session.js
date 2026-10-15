@@ -4,6 +4,9 @@ if (!window.API_BASE_URL) {
         ? 'http://localhost:1000/api'
         : 'https://server-whu3.onrender.com/api';
 }
+    let currentUserRequest = null;
+    let currentUserToken = null;
+
 window.authApi = {
     async request(path, options = {}) {
         const headers = new Headers(options.headers || {});
@@ -13,21 +16,59 @@ window.authApi = {
         return fetch(`${window.API_BASE_URL}${path}`, { ...options, headers });
     },
 
+    async requestJson(path, options = {}, errorMessage = 'הבקשה נכשלה.') {
+        const response = await this.request(path, options);
+        const contentType = response.headers.get('content-type') || '';
+        let result = {};
+
+        if (contentType.includes('application/json')) {
+            result = await response.json().catch(() => ({}));
+        } else {
+            const text = await response.text();
+            result = text ? { message: text } : {};
+        }
+
+        if (!response.ok) throw new Error(result.message || errorMessage);
+        return result;
+    },
+
     async getCurrentUser() {
         const token = window.localStorage.getItem('token');
         if (!token) return null;
 
-        const response = await this.request('/auth/me');
-        if (!response.ok) return null;
-        const result = await response.json();
-        if (result.user) window.localStorage.setItem('user', JSON.stringify(result.user));
-        return result.user || null;
+        if (!currentUserRequest || currentUserToken !== token) {
+            currentUserToken = token;
+            const request = this.requestJson('/auth/me')
+                .then((result) => {
+                    if (window.localStorage.getItem('token') !== token) return null;
+                    if (result.user) {
+                        window.localStorage.setItem('user', JSON.stringify(result.user));
+                        const nameElement = document.getElementById('current-user-name');
+                        if (nameElement) nameElement.textContent = result.user.name || result.user.email || '';
+                    }
+                    return result.user || null;
+                })
+                .catch(() => null)
+                .finally(() => {
+                    if (currentUserRequest === request) currentUserRequest = null;
+                });
+            currentUserRequest = request;
+        }
+
+        return currentUserRequest;
     },
 
     async logout() {
+        currentUserRequest = null;
+        currentUserToken = null;
         window.localStorage.removeItem('token');
         window.localStorage.removeItem('user');
         window.localStorage.removeItem('ai-home-current-user');
+    },
+
+    async logoutAndRedirect(redirectTo) {
+        await this.logout();
+        window.location.href = redirectTo;
     }
 };
 
@@ -41,5 +82,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    nameElement.textContent = user.name || user.email || '';
 });
